@@ -18,20 +18,22 @@
 "float"                                 {printf("FLOAT\n");}
 "bool"                                  {printf("BOOL\n");}
 "string"                                {printf("STRING\n");}
-"<"                                     {printf("<\n");}
-">"                                     {printf(">\n");}
+"if"                                    {printf("IF\n");}
+"else"                                  {printf("ELSE\n");}
 "("                                     {printf("(\n");}
 ")"                                     {printf(")\n");}
 "{"                                     {printf("{\n");}
 "}"                                     {printf("}\n");}
-"if"                                    {printf("IF\n");}
-"else"                                  {printf("ELSE\n");}
+"["                                     {printf("[\n");}
+"]"                                     {printf("]\n");}
 ","                                     {printf(",\n");}
 ";"                                     {printf("SEMI\n");}
 "<<"                                    {printf("ASSIGNMENT\n");}
+"<"                                     {printf("LESS\n");}
+">"                                     {printf("GREATER\n");}
+"<="                                    {printf("LESS_EQUAL\n");}
+">="                                    {printf("GREATER_EQUAL\n");}
 "=="                                    {printf("EQUAL\n");}
-"["                                     {printf("[\n");}
-"]"                                     {printf("]\n");}
 "+"                                     {printf("ADD\n");}
 "-"                                     {printf("SUB\n");}
 "*"                                     {printf("MULT\n");}
@@ -39,6 +41,7 @@
 "&&"                                    {printf("AND\n");}
 "||"                                    {printf("OR\n");}
 "!"                                     {printf("NOT\n");}
+"!="                                    {printf("NOT_EQUAL\n");}
 [a-zA-Z][a-zA-Z0-9]*                    {printf("ID(%s)\n", yytext);}
 .                                       {printf("invalid character(%s)\n", yytext);exit(0);}
 
