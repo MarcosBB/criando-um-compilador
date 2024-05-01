@@ -54,3 +54,5 @@ dkms.conf
 # Macos
 .DS_Store
 
+# lex 
+*.yy.c
