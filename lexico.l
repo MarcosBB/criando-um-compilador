@@ -3,14 +3,14 @@
 %}
 
 %%
-[ \t\n]				                    ;
-"("                                     {printf("(\n");}
-")"                                     {printf(")\n");}
-[0-9]+				                    {printf("NUMBER(%s)\n", yytext);}
+[ \t\n]                                 ;
+"--".*"\n"?                             ;
+[0-9]+                                  {printf("NUMBER(%s)\n", yytext);}
 ([[0-9]+"."[0-9]*)|([0-9]*"."[0-9]+])   {printf("REAL(%s)\n", yytext);}
 \".*\"                                  {printf("LIT_STRING\n");}
+"<"[a-zA-Z][a-zA-Z0-9]+">"              {printf("TYPE(%s)\n", yytext);}
 "while"     				            {printf("WHILE\n");}
-"for"					                {printf("FOR\n");}
+"for"                                   {printf("FOR\n");}
 "function"                              {printf("FUNCTION\n");}
 "return"                                {printf("RETURN\n");}
 "void"                                  {printf("VOID\n");}
@@ -20,6 +20,8 @@
 "string"                                {printf("STRING\n");}
 "<"                                     {printf("<\n");}
 ">"                                     {printf(">\n");}
+"("                                     {printf("(\n");}
+")"                                     {printf(")\n");}
 "{"				                  	    {printf("{\n");}
 "}"    			                  	    {printf("}\n");}
 "if"     		                  		{printf("IF\n");}
@@ -34,9 +36,11 @@
 "-"                                     {printf("SUB\n");}
 "*"                                     {printf("MULT\n");}
 "/"                                     {printf("DIV\n");}
-[a-zA-Z][a-zA-Z0-9]*	                {printf("ID(%s)\n",yytext);}
-"--".*				                    ;
-.					                    {printf("invalid character\n");exit(0);}
+"&&"                                    {printf("AND\n");}
+"||"                                    {printf("OR\n");}
+"!"                                     {printf("NOT\n");}
+[a-zA-Z][a-zA-Z0-9]*	                {printf("ID(%s)\n", yytext);}
+.					                    {printf("invalid character(%s)\n", yytext);exit(0);}
 
 %%
 #ifndef yywrap
