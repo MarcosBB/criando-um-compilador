@@ -9,7 +9,7 @@
 ([[0-9]+"."[0-9]*)|([0-9]*"."[0-9]+])   {printf("REAL(%s)\n", yytext);}
 \".*\"                                  {printf("LIT_STRING\n");}
 "<"[a-zA-Z][a-zA-Z0-9]+">"              {printf("TYPE(%s)\n", yytext);}
-"while"     				            {printf("WHILE\n");}
+"while"                                 {printf("WHILE\n");}
 "for"                                   {printf("FOR\n");}
 "function"                              {printf("FUNCTION\n");}
 "return"                                {printf("RETURN\n");}
@@ -22,13 +22,13 @@
 ">"                                     {printf(">\n");}
 "("                                     {printf("(\n");}
 ")"                                     {printf(")\n");}
-"{"				                  	    {printf("{\n");}
-"}"    			                  	    {printf("}\n");}
-"if"     		                  		{printf("IF\n");}
-"else"                        			{printf("ELSE\n");}
+"{"                                     {printf("{\n");}
+"}"                                     {printf("}\n");}
+"if"                                    {printf("IF\n");}
+"else"                                  {printf("ELSE\n");}
 ","                                     {printf(",\n");}
-";"      		                  		{printf("SEMI\n");}
-"<<"				                  	{printf("ASSIGNMENT\n");}
+";"                                     {printf("SEMI\n");}
+"<<"                                    {printf("ASSIGNMENT\n");}
 "=="                                    {printf("EQUAL\n");}
 "["                                     {printf("[\n");}
 "]"                                     {printf("]\n");}
@@ -39,12 +39,12 @@
 "&&"                                    {printf("AND\n");}
 "||"                                    {printf("OR\n");}
 "!"                                     {printf("NOT\n");}
-[a-zA-Z][a-zA-Z0-9]*	                {printf("ID(%s)\n", yytext);}
-.					                    {printf("invalid character(%s)\n", yytext);exit(0);}
+[a-zA-Z][a-zA-Z0-9]*                    {printf("ID(%s)\n", yytext);}
+.                                       {printf("invalid character(%s)\n", yytext);exit(0);}
 
 %%
 #ifndef yywrap
-	int yywrap(void){return 1;}
+    int yywrap(void){return 1;}
 #endif
 int main(void){
     yylex();
