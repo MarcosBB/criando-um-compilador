@@ -3,14 +3,14 @@
 %}
 
 %%
-[ \t\n]				                          ;
+[ \t\n]				                    ;
 "("                                     {printf("(\n");}
 ")"                                     {printf(")\n");}
-[0-9]+				                          {printf("NUMBER(%s)\n", yytext);}
+[0-9]+				                    {printf("NUMBER(%s)\n", yytext);}
 ([[0-9]+"."[0-9]*)|([0-9]*"."[0-9]+])   {printf("REAL(%s)\n", yytext);}
 \".*\"                                  {printf("LIT_STRING\n");}
-"while"     				                    {printf("WHILE\n");}
-"for"					                          {printf("FOR\n");}
+"while"     				            {printf("WHILE\n");}
+"for"					                {printf("FOR\n");}
 "function"                              {printf("FUNCTION\n");}
 "return"                                {printf("RETURN\n");}
 "void"                                  {printf("VOID\n");}
@@ -20,13 +20,13 @@
 "string"                                {printf("STRING\n");}
 "<"                                     {printf("<\n");}
 ">"                                     {printf(">\n");}
-"{"				                  	          {printf("{\n");}
-"}"    			                  	        {printf("}\n");}
-"if"     		                  		      {printf("IF\n");}
-"else"                        				  {printf("ELSE\n");}
+"{"				                  	    {printf("{\n");}
+"}"    			                  	    {printf("}\n");}
+"if"     		                  		{printf("IF\n");}
+"else"                        			{printf("ELSE\n");}
 ","                                     {printf(",\n");}
-";"      		                  		      {printf("SEMI\n");}
-"<<"				                  	        {printf("ASSIGNMENT\n");}
+";"      		                  		{printf("SEMI\n");}
+"<<"				                  	{printf("ASSIGNMENT\n");}
 "=="                                    {printf("EQUAL\n");}
 "["                                     {printf("[\n");}
 "]"                                     {printf("]\n");}
@@ -34,13 +34,13 @@
 "-"                                     {printf("SUB\n");}
 "*"                                     {printf("MULT\n");}
 "/"                                     {printf("DIV\n");}
-[a-zA-Z][a-zA-Z0-9]*	                  {printf("ID(%s)\n",yytext);}
-"--".*				                          ;
-.					                              {printf("invalid character\n");exit(0);}
+[a-zA-Z][a-zA-Z0-9]*	                {printf("ID(%s)\n",yytext);}
+"--".*				                    ;
+.					                    {printf("invalid character\n");exit(0);}
 
 %%
 #ifndef yywrap
-	  int yywrap(void){return 1;}
+	int yywrap(void){return 1;}
 #endif
 int main(void){
     yylex();
