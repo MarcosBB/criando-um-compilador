@@ -4,45 +4,49 @@
 
 %%
 [ \t\n]                                 ;
-"--".*"\n"?                             ;
-[0-9]+                                  {printf("NUMBER(%s)\n", yytext);}
-([[0-9]+"."[0-9]*)|([0-9]*"."[0-9]+])   {printf("REAL(%s)\n", yytext);}
-\".*\"                                  {printf("LIT_STRING\n");}
-"<"[a-zA-Z][a-zA-Z0-9]+">"              {printf("TYPE(%s)\n", yytext);}
-"while"                                 {printf("WHILE\n");}
-"for"                                   {printf("FOR\n");}
-"function"                              {printf("FUNCTION\n");}
-"return"                                {printf("RETURN\n");}
+"\/\/".*"\n"?                             ;
+[0-9]+                                  {yylval.iValue = atoi(yytext);
+                                        return INTEGER;}
+([[0-9]+"."[0-9]*)|([0-9]*"."[0-9]+])   {yylval.fValue = atof(yytext); return REAL}
+\".*\"                                  return(LIT_STRING);
+"<"[a-zA-Z][a-zA-Z0-9]+">"              {printf("TYPE(%s)\n", yytext);}//NÃO PERTENCE AQUI
+"while"                                 return(WHILE);
+"for"                                   return(FOR);
+"in"                                    return(IN);
+"function"                              return(FUNCTION);
+"return"                                return(RETURN);
 "void"                                  {printf("VOID\n");}
 "int"                                   {printf("INT\n");}
 "float"                                 {printf("FLOAT\n");}
 "bool"                                  {printf("BOOL\n");}
 "string"                                {printf("STRING\n");}
-"if"                                    {printf("IF\n");}
-"else"                                  {printf("ELSE\n");}
-"("                                     {printf("(\n");}
-")"                                     {printf(")\n");}
-"{"                                     {printf("{\n");}
-"}"                                     {printf("}\n");}
-"["                                     {printf("[\n");}
-"]"                                     {printf("]\n");}
-","                                     {printf(",\n");}
-";"                                     {printf("SEMI\n");}
-"<<"                                    {printf("ASSIGNMENT\n");}
-"<"                                     {printf("LESS\n");}
-">"                                     {printf("GREATER\n");}
-"<="                                    {printf("LESS_EQUAL\n");}
-">="                                    {printf("GREATER_EQUAL\n");}
-"=="                                    {printf("EQUAL\n");}
-"+"                                     {printf("ADD\n");}
-"-"                                     {printf("SUB\n");}
-"*"                                     {printf("MULT\n");}
-"/"                                     {printf("DIV\n");}
-"&&"                                    {printf("AND\n");}
-"||"                                    {printf("OR\n");}
-"!"                                     {printf("NOT\n");}
-"!="                                    {printf("NOT_EQUAL\n");}
-[a-zA-Z][a-zA-Z0-9]*                    {printf("ID(%s)\n", yytext);}
+"if"                                    return(IF);
+"else"                                  return(ELSE);
+"("                                     return(yytext[0]);
+")"                                     return(yytext[0]);
+"{"                                     return(yytext[0]);
+"}"                                     return(yytext[0]);
+"["                                     return(yytext[0]);
+"]"                                     return(yytext[0]);
+","                                     return(yytext[0]);
+";"                                     return(SEMI);
+"<<"                                    return(ASSIGN);
+"<"                                     return(LESS);
+">"                                     return(GREATER);
+"<="                                    return(LESS_EQUAL);
+">="                                    return(GREATER_EQUAL);
+"=="                                    return(EQUAL);
+"+"                                     return(yytext[0]);
+"-"                                     return(yytext[0]);
+"*"                                     return(yytext[0]);
+"/"                                     return(yytext[0]);
+"&&"                                    return(AND);
+"||"                                    return(OR);
+"!"                                     return(NOT);
+"!="                                    return(NOT_EQUAL);
+"++"                                    return(INCREMENT);
+"--"                                    return(DECREMENT);
+[a-zA-Z][a-zA-Z0-9]*                    {yylval.sValue = strdup(yytext); return ID}
 .                                       {printf("invalid character(%s)\n", yytext);exit(0);}
 
 %%
