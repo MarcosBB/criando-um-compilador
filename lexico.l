@@ -1,5 +1,6 @@
 %{
     #include <stdio.h>
+    #include "y.tab.h"
 %}
 
 %%
@@ -7,19 +8,25 @@
 "\/\/".*"\n"?                             ;
 [0-9]+                                  {yylval.iValue = atoi(yytext);
                                         return INTEGER;}
-([[0-9]+"."[0-9]*)|([0-9]*"."[0-9]+])   {yylval.fValue = atof(yytext); return REAL}
-\".*\"                                  return(LIT_STRING);
-"<"[a-zA-Z][a-zA-Z0-9]+">"              {printf("TYPE(%s)\n", yytext);}//NÃO PERTENCE AQUI
+([[0-9]+"."[0-9]*)|([0-9]*"."[0-9]+])   {yylval.fValue = atof(yytext); return REAL;}
+\"[ˆ"\n]*\"                             return(LIT_STRING);
 "while"                                 return(WHILE);
 "for"                                   return(FOR);
 "in"                                    return(IN);
 "function"                              return(FUNCTION);
 "return"                                return(RETURN);
-"void"                                  {printf("VOID\n");}
-"int"                                   {printf("INT\n");}
-"float"                                 {printf("FLOAT\n");}
-"bool"                                  {printf("BOOL\n");}
-"string"                                {printf("STRING\n");}
+"void"                                  {yylval.sValue = strdup(yytext);
+                                        return(P_TYPE);}
+"int"                                   {yylval.sValue = strdup(yytext);
+                                        return(P_TYPE);}
+"float"                                 {yylval.sValue = strdup(yytext);
+                                        return(P_TYPE);}
+"bool"                                  {yylval.sValue = strdup(yytext);
+                                        return(P_TYPE);}
+"string"                                {yylval.sValue = strdup(yytext);
+                                        return(P_TYPE);}
+"list"                                {yylval.sValue = strdup(yytext);
+                                        return(P_TYPE);}
 "if"                                    return(IF);
 "else"                                  return(ELSE);
 "("                                     return(yytext[0]);
@@ -36,24 +43,21 @@
 "<="                                    return(LESS_EQUAL);
 ">="                                    return(GREATER_EQUAL);
 "=="                                    return(EQUAL);
-"+"                                     return(yytext[0]);
-"-"                                     return(yytext[0]);
-"*"                                     return(yytext[0]);
-"/"                                     return(yytext[0]);
+"+"                                     return(PLUS);
+"-"                                     return(MINUS);
+"*"                                     return(TIMES);
+"/"                                     return(DIVIDE);
 "&&"                                    return(AND);
 "||"                                    return(OR);
 "!"                                     return(NOT);
 "!="                                    return(NOT_EQUAL);
 "++"                                    return(INCREMENT);
 "--"                                    return(DECREMENT);
-[a-zA-Z][a-zA-Z0-9]*                    {yylval.sValue = strdup(yytext); return ID}
+[a-zA-Z][a-zA-Z0-9]*                    {yylval.sValue = strdup(yytext); return ID;}
 .                                       {printf("invalid character(%s)\n", yytext);exit(0);}
 
 %%
 #ifndef yywrap
     int yywrap(void){return 1;}
 #endif
-int main(void){
-    yylex();
-    return 0;
-}
+
