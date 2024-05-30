@@ -31,26 +31,35 @@ prog : stmlist {}
 	 ;
 
 stm : assignment                      {}
-    | function
+    | function                      {}
+    ;
+
+stmlist :  stm                          {}
+    | stmlist SEMI stm                  {}
+    ;
+
+assignment : ID ASSIGN ID               {printf("%s <- %s \n",$1, $3);}
+        | P_TYPE ID ASSIGN ID       {printf("%s <- %s \n",$2, $4);}
+        | ID ASSIGN expr {}
+        ;
+        
+expr : ID PLUS term {}
+   
+
+term: ID {}
+
 
 type : P_TYPE                       {}
     | list
 
 list : P_TYPE LESS type GREATER {}
 
-function : FUNCTION type ID '(' params ')' '{'stm'}'               {}
+function : FUNCTION type ID '(' paramslist ')' '{'stm'}'               {}
 params : type ID {}
-
-paramslist: type ID {}
-        | paramslist ',' params
+        | 
+paramslist: params
+        | params ',' paramslist
         ;
-
-
-stmlist :  stm                          {}
-        | stmlist SEMI stm          
-        ;
-
-assignment : ID ASSIGN ID               {printf("%s <- %s \n",$1, $3);}
 
 %%
 

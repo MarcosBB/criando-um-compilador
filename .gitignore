@@ -56,3 +56,8 @@ dkms.conf
 
 # lex 
 *.yy.c
+
+# yacc
+*.h
+*.output
+*.c
