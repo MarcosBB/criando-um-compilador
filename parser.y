@@ -32,25 +32,29 @@ prog : stmlist {}
 
 stm : assignment                      {}
     | function                      {}
+    | while {}
+    | expr {}
     ;
 
 stmlist :  stm                          {}
     | stmlist SEMI stm                  {}
     ;
 
-assignment : ID ASSIGN ID               {printf("%s <- %s \n",$1, $3);}
+assignment : ID ASSIGN ID              {printf("%s <- %s \n",$1, $3);}
         | P_TYPE ID ASSIGN ID       {printf("%s <- %s \n",$2, $4);}
-        | ID ASSIGN expr {}
+        | ID ASSIGN expr  {}
         ;
         
 expr : ID PLUS term {}
+        ;
    
 
 term: ID {}
-
+        ;
 
 type : P_TYPE                       {}
     | list
+    ;
 
 list : P_TYPE LESS type GREATER {}
 
@@ -59,6 +63,23 @@ params : type ID {}
         | 
 paramslist: params
         | params ',' paramslist
+        ;
+
+condition: ID comparison ID  {}
+        | NOT ID {}
+        ;
+
+comparison: LESS {}
+            | GREATER {}
+            | EQUAL {}
+            | NOT_EQUAL
+            | LESS_EQUAL {}
+            | GREATER_EQUAL {}
+            | AND {}
+            | OR {}
+            ;
+
+while: WHILE '('condition')''{'stmlist'}'     {}
         ;
 
 %%
