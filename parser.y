@@ -37,7 +37,7 @@ stm : assignment                      {}
     ;
 
 stmlist :  stm                          {}
-    | stm SEMI stmlist              {}
+    | stmlist SEMI stm             {}
     ;
 
 assignment : 
@@ -45,21 +45,22 @@ assignment :
         | ID ASSIGN expr  {}
         ;
         
-expr : term PLUS expr {}
-        | term MINUS expr {}
-        | term {}
+expr : term {}
+        | expr PLUS term {}
+        | expr MINUS term {}
+        
         ;
 
-term: var TIMES term {}
+term:   var       {}
+        | var TIMES term {}
         | var DIVIDE term {}
-        | var       {}
+        
         ;
         
 var: 
     INTEGER {}
     | REAL {}
     | ID {}
-    | {}
     ;
 
 type : P_TYPE                       {}
