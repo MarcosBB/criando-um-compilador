@@ -37,20 +37,30 @@ stm : assignment                      {}
     ;
 
 stmlist :  stm                          {}
-    | stmlist SEMI stm                  {}
+    | stm SEMI stmlist              {}
     ;
 
-assignment : ID ASSIGN ID              {printf("%s <- %s \n",$1, $3);}
-        | P_TYPE ID ASSIGN ID       {printf("%s <- %s \n",$2, $4);}
+assignment : 
+         P_TYPE ID ASSIGN expr       {}
         | ID ASSIGN expr  {}
         ;
         
-expr : ID PLUS term {}
+expr : term PLUS expr {}
+        | term MINUS expr {}
+        | term {}
         ;
-   
 
-term: ID {}
+term: var TIMES term {}
+        | var DIVIDE term {}
+        | var       {}
         ;
+        
+var: 
+    INTEGER {}
+    | REAL {}
+    | ID {}
+    | {}
+    ;
 
 type : P_TYPE                       {}
     | list
@@ -59,13 +69,16 @@ type : P_TYPE                       {}
 list : P_TYPE LESS type GREATER {}
 
 function : FUNCTION type ID '(' paramslist ')' '{'stm'}'               {}
+
 params : type ID {}
-        | 
+        |  {}
+        ;
+
 paramslist: params
         | params ',' paramslist
         ;
 
-condition: ID comparison ID  {}
+condition: expr comparison expr  {}
         | NOT ID {}
         ;
 
