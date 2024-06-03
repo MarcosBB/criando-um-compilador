@@ -23,7 +23,7 @@ extern char * yytext;
 
 %token WHILE FOR IF ELSE SEMI ASSIGN EQUAL FUNCTION RETURN AND OR NOT NOT_EQUAL INCREMENT DECREMENT IN PLUS MINUS TIMES DIVIDE LESS_EQUAL GREATER_EQUAL LESS GREATER
 
-%type <sValue> prog stmlist stm assignment type list function params paramslist condition comparison if_statement while_statement for_statement
+%type <sValue> prog stmlist stm assignment type list function params paramslist condition comparison if_statement while_statement 
 %type <iValue> expr term
 %type <sValue> var
 
@@ -55,19 +55,19 @@ assignment : P_TYPE ID ASSIGN expr {}
            | ID ASSIGN expr {}
            ;
 
-expr : term {}
-     | expr PLUS term {}
-     | expr MINUS term {}
+expr : term {printf("EXPR 1\n");}
+     | expr PLUS term {printf("EXPR 2\n");}
+     | expr MINUS term {printf("EXPR 3\n");}
      ;
 
-term : var {}
-     | var TIMES term {}
-     | var DIVIDE term {}
+term : var {printf("TERM 1\n");}
+     | term TIMES var {printf("TERM 2\n");}
+     | term DIVIDE var {printf("TERM 3\n");}
      ;
 
-var : INTEGER {}
-    | REAL {}
-    | ID {}
+var : INTEGER {printf("VAR 1\n");}
+    | REAL {printf("VAR 2\n");}
+    | ID {printf("VAR 3\n");}
     ;
 
 type : P_TYPE {}
@@ -106,6 +106,7 @@ comparison : EQUAL {}
 if_statement : IF '(' condition ')' '{' stmlist '}' {}
              | IF '(' condition ')' '{' stmlist '}' ELSE '{' stmlist '}' {}
              ;
+
 
 while_statement : WHILE '(' condition ')' '{' stmlist '}' {}
                 ;
