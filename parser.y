@@ -23,7 +23,7 @@ extern char * yytext;
 
 %token WHILE FOR IF ELSE SEMI ASSIGN EQUAL FUNCTION RETURN AND OR NOT NOT_EQUAL INCREMENT DECREMENT IN PLUS MINUS TIMES DIVIDE LESS_EQUAL GREATER_EQUAL LESS GREATER
 
-%type <sValue> prog stmlist stm assignment expr term var type list function params paramslist condition comparison if while
+%type <sValue> prog stmlist stm assignment expr term var type list function params paramslist condition comparison if_statement while_statement
 
 %left OR
 %left AND
@@ -35,13 +35,13 @@ extern char * yytext;
 %start prog
 %%
 
-prog : stmlist {} 
+prog : stmlist {}
 	 ;
 
 stm : assignment {}
     | function {}
-    | if {}
-    | while {}
+    | if_statement {}
+    | while_statement {}
     | expr {}
     ;
 
@@ -52,7 +52,7 @@ stmlist : stm {}
 assignment : P_TYPE ID ASSIGN expr {}
            | ID ASSIGN expr {}
            ;
-        
+
 expr : term {}
      | expr PLUS term {}
      | expr MINUS term {}
@@ -66,7 +66,7 @@ term : var {}
 var : INTEGER {}
     | REAL {}
     | ID {}
-   ;
+    ;
 
 type : P_TYPE {}
      | list {}
@@ -99,15 +99,14 @@ comparison : EQUAL {}
            | GREATER_EQUAL {}
            | AND {}
            | OR {}
-           | NOT condition {}
            ;
 
-if : IF '(' condition ')' '{' stmlist '}' {}
-   | IF '(' condition ')' '{' stmlist '}' ELSE '{' stmlist '}' {}
-   ;
+if_statement : IF '(' condition ')' '{' stmlist '}' {}
+             | IF '(' condition ')' '{' stmlist '}' ELSE '{' stmlist '}' {}
+             ;
 
-while: WHILE '('condition')' '{'stmlist'}' {}
-     ;
+while_statement : WHILE '('condition')' '{'stmlist'}' {}
+                ;
 
 %%
 
