@@ -1,5 +1,6 @@
 %{
 #include <stdio.h>
+#include <stdlib.h>
 
 int yylex(void);
 int yyerror(char *s);
@@ -18,6 +19,7 @@ extern char * yytext;
 %token <sValue> ID
 %token <iValue> INTEGER
 %token <fValue> REAL
+%token <sValue> LIT_STRING P_TYPE
 
 %token WHILE FOR IF ELSE SEMI ASSIGN EQUAL FUNCTION RETURN AND OR NOT NOT_EQUAL INCREMENT DECREMENT IN PLUS MINUS TIMES DIVIDE LESS_EQUAL GREATER_EQUAL LESS GREATER
 

@@ -1,5 +1,7 @@
 %{
     #include <stdio.h>
+    #include <stdlib.h>
+    #include <string.h>
     #include "y.tab.h"
 %}
 
@@ -8,7 +10,7 @@
 "\/\/".*"\n"?                           ;
 [0-9]+                                  {yylval.iValue = atoi(yytext); return INTEGER;}
 ([[0-9]+"."[0-9]*)|([0-9]*"."[0-9]+])   {yylval.fValue = atof(yytext); return REAL;}
-\"[ˆ"\n]*\"                             return(LIT_STRING);
+\"[^\"]*\"                              {yylval.sValue = strdup(yytext); return LIT_STRING;}
 "while"                                 return WHILE;
 "for"                                   return FOR;
 "in"                                    return IN;
