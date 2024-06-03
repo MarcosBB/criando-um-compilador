@@ -9,11 +9,11 @@ extern char * yytext;
 %}
 
 %union {
-	int    iValue; 	/* integer value */
-    float  fValue; /* float value */
-	char   cValue; 	/* char value */
-	char * sValue;  /* string value */
-	};
+	int    iValue; /* integer value */
+	float  fValue; /* float value */
+	char   cValue; /* char value */
+	char * sValue; /* string value */
+}
 
 %token <sValue> ID
 %token <iValue> INTEGER
@@ -30,77 +30,75 @@ extern char * yytext;
 prog : stmlist {} 
 	 ;
 
-stm : assignment                      {}
-    | function                      {}
+stm : assignment {}
+    | function {}
     | while {}
     | expr {}
     ;
 
-stmlist :  stm                          {}
-    | stmlist SEMI stm             {}
-    ;
-
-assignment : 
-         P_TYPE ID ASSIGN expr       {}
-        | ID ASSIGN expr  {}
+stmlist : stm {}
+        | stmlist SEMI stm {}
         ;
+
+assignment : P_TYPE ID ASSIGN expr {}
+           | ID ASSIGN expr {}
+           ;
         
 expr : term {}
-        | expr PLUS term {}
-        | expr MINUS term {}
-        
-        ;
+     | expr PLUS term {}
+     | expr MINUS term {}
+     ;
 
-term:   var       {}
-        | var TIMES term {}
-        | var DIVIDE term {}
-        
-        ;
-        
-var: 
-    INTEGER {}
-    | REAL {}
-    | ID {}
+term: var {}
+    | var TIMES term {}
+    | var DIVIDE term {}
     ;
 
-type : P_TYPE                       {}
-    | list
-    ;
+var: INTEGER {}
+   | REAL {}
+   | ID {}
+   ;
+
+type : P_TYPE {}
+     | list
+     ;
 
 list : P_TYPE LESS type GREATER {}
+     ;
 
-function : FUNCTION type ID '(' paramslist ')' '{'stm'}'               {}
+function : FUNCTION type ID '(' paramslist ')' '{'stm'}' {}
+         ;
 
 params : type ID {}
-        |  {}
-        ;
+       | {}
+       ;
 
 paramslist: params
-        | params ',' paramslist
-        ;
+          | params ',' paramslist
+          ;
 
 condition: expr comparison expr  {}
         | NOT ID {}
+        | '(' condition ')' {}
         ;
 
-comparison: LESS {}
-            | GREATER {}
-            | EQUAL {}
-            | NOT_EQUAL
-            | LESS_EQUAL {}
-            | GREATER_EQUAL {}
-            | AND {}
-            | OR {}
-            ;
+comparison : EQUAL {}
+           | NOT_EQUAL {}
+           | LESS {}
+           | GREATER {}
+           | LESS_EQUAL {}
+           | GREATER_EQUAL {}
+           | AND {}
+           | OR {}
+   ;
 
-while: WHILE '('condition')''{'stmlist'}'     {}
-        ;
+while: WHILE '('condition')' '{'stmlist'}' {}
+     ;
 
 %%
 
-
 int main (void) {
-	return yyparse ( );
+	return yyparse ();
 }
 
 int yyerror (char *msg) {
