@@ -19,9 +19,9 @@ extern char * yytext;
 %token <iValue> INTEGER
 %token <fValue> REAL
 
-%token WHILE FOR IF ELSE SEMI ASSIGN EQUAL FUNCTION RETURN AND OR NOT NOT_EQUAL INCREMENT DECREMENT IN PLUS MINUS TIMES DIVIDE LESS_EQUAL GREATER_EQUAL LESS GREATER LIT_STRING P_TYPE
+%token WHILE FOR IF ELSE SEMI ASSIGN EQUAL FUNCTION RETURN AND OR NOT NOT_EQUAL INCREMENT DECREMENT IN PLUS MINUS TIMES DIVIDE LESS_EQUAL GREATER_EQUAL LESS GREATER
 
-%type <sValue> condition expr term
+%type <sValue> prog stmlist stm assignment expr term var type list function params paramslist condition comparison if while
 
 %left OR
 %left AND
@@ -56,38 +56,38 @@ expr : term {}
      | expr MINUS term {}
      ;
 
-term: var {}
-    | var TIMES term {}
-    | var DIVIDE term {}
-    ;
+term : var {}
+     | var TIMES term {}
+     | var DIVIDE term {}
+     ;
 
-var: INTEGER {}
-   | REAL {}
-   | ID {}
+var : INTEGER {}
+    | REAL {}
+    | ID {}
    ;
 
 type : P_TYPE {}
-     | list
+     | list {}
      ;
 
 list : P_TYPE LESS type GREATER {}
      ;
 
-function : FUNCTION type ID '(' paramslist ')' '{'stm'}' {}
+function : FUNCTION type ID '(' paramslist ')' '{' stmlist '}' {}
          ;
 
 params : type ID {}
        | {}
        ;
 
-paramslist: params
-          | params ',' paramslist
-          ;
+paramslist : params {}
+           | params ',' paramslist {}
+           ;
 
-condition: expr comparison expr  {}
-        | NOT ID {}
-        | '(' condition ')' {}
-        ;
+condition : expr comparison expr {}
+          | NOT ID {}
+          | '(' condition ')' {}
+          ;
 
 comparison : EQUAL {}
            | NOT_EQUAL {}
