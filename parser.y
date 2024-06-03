@@ -21,8 +21,14 @@ extern char * yytext;
 
 %token WHILE FOR IF ELSE SEMI ASSIGN EQUAL FUNCTION RETURN AND OR NOT NOT_EQUAL INCREMENT DECREMENT IN PLUS MINUS TIMES DIVIDE LESS_EQUAL GREATER_EQUAL LESS GREATER LIT_STRING P_TYPE
 
+%type <sValue> condition expr term
+
+%left OR
+%left AND
+%left EQUAL NOT_EQUAL LESS GREATER LESS_EQUAL GREATER_EQUAL
 %left PLUS MINUS
 %left TIMES DIVIDE
+%right NOT
 
 %start prog
 %%
@@ -32,6 +38,7 @@ prog : stmlist {}
 
 stm : assignment {}
     | function {}
+    | if {}
     | while {}
     | expr {}
     ;
@@ -90,6 +97,11 @@ comparison : EQUAL {}
            | GREATER_EQUAL {}
            | AND {}
            | OR {}
+           | NOT condition {}
+           ;
+
+if : IF '(' condition ')' '{' stmlist '}' {}
+   | IF '(' condition ')' '{' stmlist '}' ELSE '{' stmlist '}' {}
    ;
 
 while: WHILE '('condition')' '{'stmlist'}' {}
