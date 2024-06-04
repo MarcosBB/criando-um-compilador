@@ -10,10 +10,10 @@ extern char * yytext;
 %}
 
 %union {
-	int    iValue; /* integer value */
-	float  fValue; /* float value */
-	char   cValue; /* char value */
-	char * sValue; /* string value */
+    int    iValue; /* integer value */
+    float  fValue; /* float value */
+    char   cValue; /* char value */
+    char * sValue; /* string value */
 }
 
 %token <sValue> ID
@@ -38,7 +38,7 @@ extern char * yytext;
 %%
 
 prog : stmlist {}
-	 ;
+     ;
 
 stm : assignment {}
     | function {}
@@ -67,40 +67,40 @@ term : var { printf("Term: 1\n"); }
 
 var : INTEGER { printf("Var: 1\n"); }
     | REAL { printf("Var: 2\n"); }
-    | ID { printf("Var: 1\n"); }
+    | ID { printf("Var: 3\n"); }
     ;
 
 type : P_TYPE { printf("Type: 1\n"); }
      | list { printf("Type: 2\n"); }
      ;
 
-list : P_TYPE LESS type GREATER { printf("List: 1\n"); }
+list : P_TYPE LESS type GREATER { printf("List\n"); }
      ;
 
-function : FUNCTION type ID '(' paramslist ')' '{' stmlist '}' { printf("Function: 1\n"); }
+function : FUNCTION type ID '(' paramslist ')' '{' stmlist '}' { printf("Function\n"); }
          ;
 
-params : type ID { printf("Param: 1\n"); }
+params : type ID { printf("Params\n"); }
        | {}
        ;
 
-paramslist : params { printf("Paramlist: 1\n"); }
-           | params ',' paramslist { printf("Paramlist: 2\n"); }
+paramslist : params { printf("Paramlist: single\n"); }
+           | params ',' paramslist { printf("Paramlist: multiple\n"); }
            ;
 
-condition : expr comparison expr { printf("Condition: 1\n"); }
-          | NOT ID { printf("Condition: 2\n"); }
-          | '(' condition ')' { printf("Condition: 3\n"); }
+condition : expr comparison expr { printf("Condition exprs\n"); }
+          | NOT ID { printf("Condition not\n"); }
+          | '(' condition ')' { printf("(Condition)\n"); }
           ;
 
-comparison : EQUAL { printf("Comparisson: ==\n"); }
-           | NOT_EQUAL { printf("Comparisson: !=\n"); }
-           | LESS { printf("Comparisson: <\n"); }
-           | GREATER { printf("Comparisson: >\n"); }
-           | LESS_EQUAL { printf("Comparisson: <=\n"); }
-           | GREATER_EQUAL { printf("Comparisson: >=\n"); }
-           | AND { printf("Comparisson: &&\n"); }
-           | OR { printf("Comparisson: ||\n"); }
+comparison : EQUAL { printf("Comparison: ==\n"); }
+           | NOT_EQUAL { printf("Comparison: !=\n"); }
+           | LESS { printf("Comparison: <\n"); }
+           | GREATER { printf("Comparison: >\n"); }
+           | LESS_EQUAL { printf("Comparison: <=\n"); }
+           | GREATER_EQUAL { printf("Comparison: >=\n"); }
+           | AND { printf("Comparison: &&\n"); }
+           | OR { printf("Comparison: ||\n"); }
            ;
 
 if_statement : IF '(' condition ')' '{' stmlist '}' { printf("If: {...}\n"); }
@@ -108,15 +108,15 @@ if_statement : IF '(' condition ')' '{' stmlist '}' { printf("If: {...}\n"); }
              ;
 
 while_statement : WHILE '(' condition ')' '{' stmlist '}' { printf("While: {...}\n"); }
-              ;
+                ;
 
 %%
 
 int main (void) {
-	return yyparse ();
+    return yyparse ();
 }
 
 int yyerror (char *msg) {
-	fprintf (stderr, "%d: %s at '%s'\n", yylineno, msg, yytext);
-	return 0;
+    fprintf (stderr, "%d: %s at '%s'\n", yylineno, msg, yytext);
+    return 0;
 }
