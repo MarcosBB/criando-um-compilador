@@ -33,37 +33,50 @@ make DEFAULT_TOOL=bison
 
 ## Compilando e executando o projeto de forma manual
 
+- **1° passo**
+
 ```bash
 lex lexico.l
 ```
+- **2° passo**
 
-Para compilar com `lex` e `yacc`:
+Para compilar com `lex` & `yacc`:
 
 ```bash
 yacc parser.y -d -v 
 ```
 
-Para executar com `lex` e `bison`
+Para compilar com `lex` & `bison`:
 
 ```bash
 bison parser.y -d -v
 ```
 
+- **3° passo**
+
+Gerando objeto executável:
+
 ```bash
 gcc lex.yy.c y.tab.c -o compiler.exe
 ```
+
+- **4° passo**
+
+Executando com o arquivo de teste:
 
 ```bash
 ./compiler.exe < mergesort.txt
 ```
 
-Para remover os arquivos compilados & executáveis com `yacc`
+Sempre que necessário, remover:
+
+1. Os arquivos compilados e executáveis com `yacc`.
 
 ```bash
 rm -f lex.yy.c y.tab.c y.tab.h y.output compiler.exe
 ```
 
-Para remover os arquivos compilados & executáveis com `bison`
+2. Os arquivos compilados e executáveis com `bison`.
 
 ```bash
 rm -f lex.yy.c parser.tab.c parser.tab.h parser.output compiler.exe
