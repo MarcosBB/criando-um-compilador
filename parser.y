@@ -56,8 +56,8 @@ assignment : P_TYPE ID ASSIGN expr { printf("Assignment: 1\n"); }
            ;
 
 expr : term { printf("Expr: 1\n"); }
-     | expr PLUS term { $$ = $1 + $3; printf("Expr: 2\n"); }
-     | expr MINUS term { $$ = $1 - $3; printf("Expr: 3\n"); }
+     | expr PLUS term { printf("Expr: 2\n"); }
+     | expr MINUS term { printf("Expr: 3\n"); }
      ;
 
 term : var { printf("Term: 1\n"); }
