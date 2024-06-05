@@ -23,7 +23,7 @@ extern char *yytext;
 
 %token WHILE FOR IF ELSE SEMI ASSIGN EQUAL FUNCTION RETURN AND OR NOT NOT_EQUAL INCREMENT DECREMENT IN PLUS MINUS TIMES DIVIDE LESS_EQUAL GREATER_EQUAL LESS GREATER
 
-%type <sValue> prog stmlist stm assignment type list function params paramslist condition comparison if_statement while_statement
+%type <sValue> prog stmlist stm assignment type list function params paramslist condition comparison if_statement while_statement for_statement
 %type <iValue> expr term
 %type <sValue> var
 
@@ -140,6 +140,10 @@ if_statement : IF '(' condition ')' '{' stmlist '}' { printf("If statement: if (
 
 while_statement : WHILE '(' condition_list ')' '{' stmlist '}' { printf("While statement: while ( condition ) { stmlist }\n"); }
                 ;
+
+for_statement : FOR '(' assignment ';' condition ';' assignment ')' '{' stmlist '}' { printf("For statement: for ( assignment ; condition ; assignment ) { stmlist }\n"); }
+              | FOR '(' P_TYPE ID IN ID ')' '{' stmlist '}' { printf("For statement: for ( type id in id ) { stmlist }\n"); }
+              ;
 
 %%
 
