@@ -5,7 +5,7 @@
 int yylex(void);
 int yyerror(char *s);
 extern int yylineno;
-extern char * yytext;
+extern char *yytext;
 
 %}
 
@@ -13,7 +13,7 @@ extern char * yytext;
     int    iValue; /* integer value */
     float  fValue; /* float value */
     char   cValue; /* char value */
-    char * sValue; /* string value */
+    char  *sValue; /* string value */
 }
 
 %token <sValue> ID
@@ -37,60 +37,60 @@ extern char * yytext;
 %start prog
 %%
 
-prog : stmlist {}
+prog : stmlist { printf("Program\n"); }
      ;
 
-stm : assignment {}
-    | function {}
-    | if_statement {}
-    | while_statement {}
-    | expr {}
+stm : assignment { printf("Statement: assignment\n"); }
+    | function { printf("Statement: function\n"); }
+    | if_statement { printf("Statement: if_statement\n"); }
+    | while_statement { printf("Statement: while_statement\n"); }
+    | expr { printf("Statement: expr\n"); }
     ;
 
-stmlist : stm {}
-        | stmlist SEMI stm {}
+stmlist : stm { printf("Statement list: single\n"); }
+        | stmlist SEMI stm { printf("Statement list: multiple\n"); }
         ;
 
-assignment : P_TYPE ID ASSIGN expr { printf("Assignment: 1\n"); }
-           | ID ASSIGN expr { printf("Assignment: 2\n"); }
+assignment : P_TYPE ID ASSIGN expr { printf("Assignment: type id << expr\n"); }
+           | ID ASSIGN expr { printf("Assignment: id << expr\n"); }
            ;
 
-expr : term { printf("Expr: 1\n"); }
-     | expr PLUS term { printf("Expr: 2\n"); }
-     | expr MINUS term { printf("Expr: 3\n"); }
+expr : term { printf("Expr: term\n"); }
+     | expr PLUS term { printf("Expr: expr + term\n"); }
+     | expr MINUS term { printf("Expr: expr - term\n"); }
      ;
 
-term : var { printf("Term: 1\n"); }
-     | term TIMES var { printf("Term: 2\n"); }
-     | term DIVIDE var { printf("Term: 3\n"); }
+term : var { printf("Term: var\n"); }
+     | term TIMES var { printf("Term: term * var\n"); }
+     | term DIVIDE var { printf("Term: term / var\n"); }
      ;
 
-var : INTEGER { printf("Var: 1\n"); }
-    | REAL { printf("Var: 2\n"); }
-    | ID { printf("Var: 3\n"); }
+var : INTEGER { printf("Var: integer\n"); }
+    | REAL { printf("Var: real\n"); }
+    | ID { printf("Var: id\n"); }
     ;
 
-type : P_TYPE { printf("Type: 1\n"); }
-     | list { printf("Type: 2\n"); }
+type : P_TYPE { printf("Type: P_TYPE\n"); }
+     | list { printf("Type: list\n"); }
      ;
 
-list : P_TYPE LESS type GREATER { printf("List\n"); }
+list : P_TYPE LESS type GREATER { printf("List: P_TYPE < type >\n"); }
      ;
 
-function : FUNCTION type ID '(' paramslist ')' '{' stmlist '}' { printf("Function\n"); }
+function : FUNCTION type ID '(' paramslist ')' '{' stmlist '}' { printf("Function: function definition\n"); }
          ;
 
-params : type ID { printf("Params\n"); }
-       | {}
+params : type ID { printf("Params: type id\n"); }
+       | { printf("Params: empty\n"); }
        ;
 
-paramslist : params { printf("Paramlist: single\n"); }
-           | params ',' paramslist { printf("Paramlist: multiple\n"); }
+paramslist : params { printf("Params list: single\n"); }
+           | params ',' paramslist { printf("Params list: multiple\n"); }
            ;
 
-condition : expr comparison expr { printf("Condition exprs\n"); }
-          | NOT ID { printf("Condition not\n"); }
-          | '(' condition ')' { printf("(Condition)\n"); }
+condition : expr comparison expr { printf("Condition: expr comparison expr\n"); }
+          | NOT ID { printf("Condition: not id\n"); }
+          | '(' condition ')' { printf("Condition: ( condition )\n"); }
           ;
 
 comparison : EQUAL { printf("Comparison: ==\n"); }
@@ -103,11 +103,11 @@ comparison : EQUAL { printf("Comparison: ==\n"); }
            | OR { printf("Comparison: ||\n"); }
            ;
 
-if_statement : IF '(' condition ')' '{' stmlist '}' { printf("If: {...}\n"); }
-             | IF '(' condition ')' '{' stmlist '}' ELSE '{' stmlist '}' { printf("If-Else: {...} else {...}\n"); }
+if_statement : IF '(' condition ')' '{' stmlist '}' { printf("If statement: if ( condition ) { stmlist }\n"); }
+             | IF '(' condition ')' '{' stmlist '}' ELSE '{' stmlist '}' { printf("If statement: if ( condition ) { stmlist } else { stmlist }\n"); }
              ;
 
-while_statement : WHILE '(' condition ')' '{' stmlist '}' { printf("While: {...}\n"); }
+while_statement : WHILE '(' condition ')' '{' stmlist '}' { printf("While statement: while ( condition ) { stmlist }\n"); }
                 ;
 
 %%
