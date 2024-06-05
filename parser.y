@@ -53,6 +53,7 @@ stm : assignment { printf("Statement: assignment\n"); }
     | function { printf("Statement: function\n"); }
     | if_statement { printf("Statement: if_statement\n"); }
     | while_statement { printf("Statement: while_statement\n"); }
+    | for_statement { printf("Statement: for_statement\n"); }
     | expr { printf("Statement: expr\n"); }
     | return { printf("Statement: return\n");}
     | function_call { printf("Statement: function_call\n"); }
@@ -85,6 +86,7 @@ var : INTEGER { printf("Var: integer\n"); }
     | REAL { printf("Var: real\n"); }
     | ID { printf("Var: id\n"); }
     | list_value { printf("Var: list_value\n"); }
+    | LIT_STRING { printf("Var: string\n"); }
     ;
 
 type : P_TYPE { printf("Type: P_TYPE\n"); }
