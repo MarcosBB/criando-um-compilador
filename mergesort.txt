@@ -1,35 +1,37 @@
 function void quickSort(list<string> lista, int inicio, int fim) {
-    if (int inicio > int fim) {
+    if (inicio > fim) {
         return
-    }
+    };
 
     int anterior << inicio;
     int posterior << fim;
     string pivo << lista[inicio];
 
     while (anterior < posterior) {
-        while anterior < posterior && lista[posterior] > pivo {
-            posterior << posterior - 1;
-        }
-        if anterior < posterior {
+        while (anterior < posterior && lista[posterior] > pivo) {
+            posterior << posterior - 1
+        };
+
+        if (anterior < posterior) {
             lista[anterior] << lista[posterior];
-            anterior << anterior + 1;
-        }
+            anterior << anterior + 1
+        };
 
 
-        while anterior < posterior && lista[anterior] < pivo {
-            anterior << anterior + 1;
-        }
-        if anterior < posterior {
+        while (anterior < posterior && lista[anterior] < pivo) {
+            anterior << anterior + 1
+        };
+
+        if (anterior < posterior) {
             lista[posterior] << lista[anterior];
-            posterior << posterior - 1;
-        }
+            posterior << posterior - 1
+        };
     
-        lista[anterior] << pivo;
-    }
+        lista[anterior] << pivo
+    };
 
     quickSort(lista, inicio, anterior - 1);
-    quickSort(lista, anterior + 1, fim);
+    quickSort(lista, anterior + 1, fim)
 }
 
 function void main(){

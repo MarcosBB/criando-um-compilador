@@ -37,14 +37,25 @@ extern char *yytext;
 %start prog
 %%
 
-prog : stmlist { printf("Program\n"); }
+prog : subprogs_list{ printf("Program\n"); }
      ;
+
+subprogs_list: subprog { printf("Subprog_list: subprog\n"); }
+    | subprogs_list SEMI subprog { printf("Subprogs_list: subprogs_list SEMI subprog\n"); }
+    ;
+
+subprog: function { printf("Subprog: function\n"); }
+    | { printf("Subgprog: empty \n");}
+    ;
+    
 
 stm : assignment { printf("Statement: assignment\n"); }
     | function { printf("Statement: function\n"); }
     | if_statement { printf("Statement: if_statement\n"); }
     | while_statement { printf("Statement: while_statement\n"); }
     | expr { printf("Statement: expr\n"); }
+    | return { printf("Statement: return\n");}
+    | function_call { printf("Statement: function_call\n"); }
     ;
 
 stmlist : stm { printf("Statement list: single\n"); }
@@ -53,7 +64,12 @@ stmlist : stm { printf("Statement list: single\n"); }
 
 assignment : P_TYPE ID ASSIGN expr { printf("Assignment: type id << expr\n"); }
            | ID ASSIGN expr { printf("Assignment: id << expr\n"); }
+           | list_value ASSIGN expr { printf("ssignment: list_value << expr \n"); }
            ;
+
+return: RETURN {printf("Return:empty\n");}
+        | RETURN expr {printf("Return: expr\n");}
+        ;
 
 expr : term { printf("Expr: term\n"); }
      | expr PLUS term { printf("Expr: expr + term\n"); }
@@ -68,6 +84,7 @@ term : var { printf("Term: var\n"); }
 var : INTEGER { printf("Var: integer\n"); }
     | REAL { printf("Var: real\n"); }
     | ID { printf("Var: id\n"); }
+    | list_value { printf("Var: list_value\n"); }
     ;
 
 type : P_TYPE { printf("Type: P_TYPE\n"); }
@@ -77,10 +94,21 @@ type : P_TYPE { printf("Type: P_TYPE\n"); }
 list : P_TYPE LESS type GREATER { printf("List: P_TYPE < type >\n"); }
      ;
 
+list_value : ID '['index']'  { printf("list_value: ID[index] \n"); }
+    ;
+
+index: ID { printf("index: ID \n"); }
+    | INTEGER { printf("index: INTEGER \n"); }
+    ;
+
 function : FUNCTION type ID '(' paramslist ')' '{' stmlist '}' { printf("Function: function definition\n"); }
          ;
 
+function_call: ID '('paramslist')' { printf("Function_call: ID(paramslist)\n"); }
+        ;
+
 params : type ID { printf("Params: type id\n"); }
+       | expr { printf("Params: expr\n"); }
        | { printf("Params: empty\n"); }
        ;
 
@@ -92,6 +120,9 @@ condition : expr comparison expr { printf("Condition: expr comparison expr\n"); 
           | NOT ID { printf("Condition: not id\n"); }
           | '(' condition ')' { printf("Condition: ( condition )\n"); }
           ;
+
+condition_list: condition  { printf("condition_list: condition \n"); }
+            | condition_list comparison condition { printf("condition_list: condition_list comparison condition \n"); }
 
 comparison : EQUAL { printf("Comparison: ==\n"); }
            | NOT_EQUAL { printf("Comparison: !=\n"); }
@@ -107,7 +138,7 @@ if_statement : IF '(' condition ')' '{' stmlist '}' { printf("If statement: if (
              | IF '(' condition ')' '{' stmlist '}' ELSE '{' stmlist '}' { printf("If statement: if ( condition ) { stmlist } else { stmlist }\n"); }
              ;
 
-while_statement : WHILE '(' condition ')' '{' stmlist '}' { printf("While statement: while ( condition ) { stmlist }\n"); }
+while_statement : WHILE '(' condition_list ')' '{' stmlist '}' { printf("While statement: while ( condition ) { stmlist }\n"); }
                 ;
 
 %%
