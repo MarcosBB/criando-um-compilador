@@ -6,7 +6,7 @@ YACC = bison
 YACC_FLAGS = -d -v -Wcounterexamples
 
 # Source files
-LEX_FILE = lexico.l
+LEX_FILE = lexer.l
 YACC_FILE = parser.y
 
 # Executable name

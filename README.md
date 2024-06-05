@@ -36,7 +36,7 @@ make DEFAULT_TOOL=bison
 - **1° passo**
 
 ```bash
-lex lexico.l
+lex lexer.l
 ```
 - **2° passo**
 
