@@ -63,7 +63,7 @@ stmlist : stm { printf("Statement list: single\n"); }
         | stmlist SEMI stm { printf("Statement list: multiple\n"); }
         ;
 
-assignment : P_TYPE ID ASSIGN expr { printf("Assignment: type id << expr\n"); }
+assignment : type ID ASSIGN expr { printf("Assignment: type id << expr\n"); }
            | ID ASSIGN expr { printf("Assignment: id << expr\n"); }
            | list_value ASSIGN expr { printf("ssignment: list_value << expr \n"); }
            ;
@@ -89,6 +89,11 @@ var : INTEGER { printf("Var: integer\n"); }
     | LIT_STRING { printf("Var: string\n"); }
     ;
 
+var_list : var { printf("var_list: var\n");}
+    | var_list ',' var { printf("var_list: var_lsit , var\n");}
+    | { printf("var_list: empty\n");}
+    ;
+
 type : P_TYPE { printf("Type: P_TYPE\n"); }
      | list { printf("Type: list\n"); }
      ;
@@ -97,6 +102,7 @@ list : P_TYPE LESS type GREATER { printf("List: P_TYPE < type >\n"); }
      ;
 
 list_value : ID '['index']'  { printf("list_value: ID[index] \n"); }
+    | '[' var_list ']' { printf("list_value: var_list\n"); }
     ;
 
 index: ID { printf("index: ID \n"); }

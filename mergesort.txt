@@ -32,14 +32,14 @@ function void quickSort(list<string> lista, int inicio, int fim) {
 
     quickSort(lista, inicio, anterior - 1);
     quickSort(lista, anterior + 1, fim)
-}
+};
 
-function void main(){
+function void main() {
     list<string> listaDeNomes << ["João", "Maria", "José", "Pedro", "Ana", "Carlos", "Mariana", "Fernanda", "Ricardo", "Paulo"];
     quickSort(listaDeNomes, 0, 9);
 
     for(string nome in listaDeNomes){
-        print("nome: $nome");
+        print("nome: $nome")
     }
 }
 // Teste de comentário
