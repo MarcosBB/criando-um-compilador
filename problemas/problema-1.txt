@@ -1,0 +1,9 @@
+function void quadratic(float x, float y, int c) {
+    float result << (x * x) - y + c;
+    return result;
+}
+
+function void main() {
+    float fX << quadratic(3.5, 2.1, 5);
+    print("Resultado da expressão: $fX");
+}
