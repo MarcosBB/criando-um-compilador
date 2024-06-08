@@ -2,12 +2,12 @@
 CC = gcc
 LEX = lex
 DEFAULT_TOOL ?= yacc
-YACC = bison
-YACC_FLAGS = -d -v -Wcounterexamples
+YACC = $(DEFAULT_TOOL)
+FLAGS = -d -v
 
 # Source files
 LEX_FILE = lexer.l
-YACC_FILE = parser.y
+PARSE_FILE = parser.y
 
 # Executable name
 EXEC = compiler.exe
@@ -16,27 +16,28 @@ EXEC = compiler.exe
 INPUT_FILE = mergesort.txt
 
 # Output files
-YACC_OUT_C = $(if $(filter $(DEFAULT_TOOL),yacc),y.tab.c,parser.tab.c)
-YACC_OUT_H = $(if $(filter $(DEFAULT_TOOL),yacc),y.tab.h,parser.tab.h)
-YACC_OUT_O = $(if $(filter $(DEFAULT_TOOL),yacc),y.output,parser.output)
+L_OUT_C = lex.yy.c
+Y_OUT_C = $(if $(filter $(DEFAULT_TOOL),yacc),y.tab.c,parser.tab.c)
+Y_OUT_H = $(if $(filter $(DEFAULT_TOOL),yacc),y.tab.h,parser.tab.h)
+Y_OUT_O = $(if $(filter $(DEFAULT_TOOL),yacc),y.output,parser.output)
 
 # Targets
 .PHONY: all clean
 
 all: $(EXEC)
 
-$(EXEC): lex.yy.c y.tab.c
+$(EXEC): $(L_OUT_C) $(Y_OUT_C)
 	@echo "Compiling executable..."
-	@$(CC) lex.yy.c y.tab.c -o $(EXEC)
+	@$(CC) $(L_OUT_C) $(Y_OUT_C) -o $(EXEC)
 	@echo "The bomb has been planted!"
 
-lex.yy.c: $(LEX_FILE)
+$(L_OUT_C): $(LEX_FILE)
 	@echo "Generating lexer..."
 	@$(LEX) $(LEX_FILE)
 
-y.tab.c: $(YACC_FILE)
+$(Y_OUT_C): $(PARSE_FILE)
 	@echo "Generating parser..."
-	@$(DEFAULT_TOOL) $(YACC_FLAGS) $(YACC_FILE)
+	@$(YACC) $(FLAGS) $(PARSE_FILE)
 
 run: $(EXEC)
 	@echo "Running compiler with input file: $(INPUT_FILE)"
@@ -44,5 +45,5 @@ run: $(EXEC)
 
 clean:
 	@echo "Cleaning up..."
-	@rm -f lex.yy.c $(YACC_OUT_C) $(YACC_OUT_H) $(YACC_OUT_O) $(EXEC)
+	@rm -f $(L_OUT_C) $(Y_OUT_C) $(Y_OUT_H) $(Y_OUT_O) $(EXEC)
 	@echo "The bomb has been disarmed!"
