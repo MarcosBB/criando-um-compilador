@@ -54,10 +54,16 @@ bison parser.y -d -v
 
 - **3° passo**
 
-Gerando objeto executável:
+Gerando objeto executável com `lex` & `yacc`:
 
 ```bash
 gcc lex.yy.c y.tab.c -o compiler.exe
+```
+
+Gerando objeto executável com `lex` & `bison`:
+
+```bash
+gcc lex.yy.c parser.tab.c -o compiler.exe
 ```
 
 - **4° passo**
