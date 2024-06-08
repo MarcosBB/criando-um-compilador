@@ -9,25 +9,24 @@ function void quickSort(list<string> lista, int inicio, int fim) {
 
     while (anterior < posterior) {
         while (anterior < posterior && lista[posterior] > pivo) {
-            posterior << posterior - 1
+            posterior << posterior - 1;
         };
 
         if (anterior < posterior) {
             lista[anterior] << lista[posterior];
-            anterior << anterior + 1
+            anterior << anterior + 1;
         };
 
-
         while (anterior < posterior && lista[anterior] < pivo) {
-            anterior << anterior + 1
+            anterior << anterior + 1;
         };
 
         if (anterior < posterior) {
             lista[posterior] << lista[anterior];
-            posterior << posterior - 1
+            posterior << posterior - 1;
         };
     
-        lista[anterior] << pivo
+        lista[anterior] << pivo;
     };
 
     quickSort(lista, inicio, anterior - 1);
@@ -38,8 +37,8 @@ function void main() {
     list<string> listaDeNomes << ["João", "Maria", "José", "Pedro", "Ana", "Carlos", "Mariana", "Fernanda", "Ricardo", "Paulo"];
     quickSort(listaDeNomes, 0, 9);
 
-    for(string nome in listaDeNomes){
-        print("nome: $nome")
-    }
+    for(string nome in listaDeNomes) {
+        print("nome: $nome");
+    };
 }
 // Teste de comentário
