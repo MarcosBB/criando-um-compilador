@@ -71,7 +71,7 @@ gcc lex.yy.c parser.tab.c -o compiler.exe
 Executando com o arquivo de teste:
 
 ```bash
-./compiler.exe < mergesort.txt
+./compiler.exe < tests/mergesort.txt
 ```
 
 Sempre que necessário, remover:
