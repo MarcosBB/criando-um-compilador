@@ -23,9 +23,8 @@ extern char *yytext;
 
 %token WHILE FOR IF ELSE SEMI ASSIGN EQUAL FUNCTION RETURN AND OR NOT NOT_EQUAL INCREMENT DECREMENT IN PLUS MINUS TIMES DIVIDE LESS_EQUAL GREATER_EQUAL LESS GREATER
 
-%type <sValue> prog stmlist stm assignment type list function params paramslist condition comparison if_statement while_statement for_statement
+%type <sValue> prog stmlist stm assignment var type list function params paramslist condition comparison if_statement while_statement for_statement
 %type <iValue> expr term
-%type <sValue> var
 
 %left OR
 %left AND
@@ -37,17 +36,16 @@ extern char *yytext;
 %start prog
 %%
 
-prog : subprogs_list{ printf("Program\n"); }
+prog : subprogs_list { printf("Program\n"); }
      ;
 
-subprogs_list: subprog { printf("Subprog_list: subprog\n"); }
-    | subprogs_list SEMI subprog { printf("Subprogs_list: subprogs_list SEMI subprog\n"); }
-    ;
+subprogs_list : subprog { printf("Subprog_list: subprog\n"); }
+              | subprogs_list SEMI subprog { printf("Subprogs_list: subprogs_list SEMI subprog\n"); }
+              ;
 
-subprog: function { printf("Subprog: function\n"); }
-    | { printf("Subgprog: empty \n");}
-    ;
-    
+subprog : function { printf("Subprog: function\n"); }
+        | { printf("Subprog: empty\n"); }
+        ;
 
 stm : assignment { printf("Statement: assignment\n"); }
     | function { printf("Statement: function\n"); }
@@ -55,7 +53,7 @@ stm : assignment { printf("Statement: assignment\n"); }
     | while_statement { printf("Statement: while_statement\n"); }
     | for_statement { printf("Statement: for_statement\n"); }
     | expr { printf("Statement: expr\n"); }
-    | return { printf("Statement: return\n");}
+    | return { printf("Statement: return\n"); }
     | function_call { printf("Statement: function_call\n"); }
     ;
 
@@ -65,12 +63,12 @@ stmlist : stm { printf("Statement list: single\n"); }
 
 assignment : type ID ASSIGN expr { printf("Assignment: type id << expr\n"); }
            | ID ASSIGN expr { printf("Assignment: id << expr\n"); }
-           | list_value ASSIGN expr { printf("ssignment: list_value << expr \n"); }
+           | list_value ASSIGN expr { printf("Assignment: list_value << expr\n"); }
            ;
 
-return: RETURN {printf("Return:empty\n");}
-        | RETURN expr {printf("Return: expr\n");}
-        ;
+return : RETURN { printf("Return: empty\n"); }
+       | RETURN expr { printf("Return: expr\n"); }
+       ;
 
 expr : term { printf("Expr: term\n"); }
      | expr PLUS term { printf("Expr: expr + term\n"); }
@@ -89,10 +87,10 @@ var : INTEGER { printf("Var: integer\n"); }
     | LIT_STRING { printf("Var: string\n"); }
     ;
 
-var_list : var { printf("var_list: var\n");}
-    | var_list ',' var { printf("var_list: var_lsit , var\n");}
-    | { printf("var_list: empty\n");}
-    ;
+var_list : var { printf("var_list: var\n"); }
+         | var_list ',' var { printf("var_list: var_list , var\n"); }
+         | { printf("var_list: empty\n"); }
+         ;
 
 type : P_TYPE { printf("Type: P_TYPE\n"); }
      | list { printf("Type: list\n"); }
@@ -101,19 +99,19 @@ type : P_TYPE { printf("Type: P_TYPE\n"); }
 list : P_TYPE LESS type GREATER { printf("List: P_TYPE < type >\n"); }
      ;
 
-list_value : ID '['index']'  { printf("list_value: ID[index] \n"); }
-    | '[' var_list ']' { printf("list_value: var_list\n"); }
-    ;
+list_value : ID '[' index ']' { printf("list_value: ID[index]\n"); }
+           | '[' var_list ']' { printf("list_value: var_list\n"); }
+           ;
 
-index: ID { printf("index: ID \n"); }
-    | INTEGER { printf("index: INTEGER \n"); }
-    ;
+index : ID { printf("index: ID\n"); }
+      | INTEGER { printf("index: INTEGER\n"); }
+      ;
 
 function : FUNCTION type ID '(' paramslist ')' '{' stmlist '}' { printf("Function: function definition\n"); }
          ;
 
-function_call: ID '('paramslist')' { printf("Function_call: ID(paramslist)\n"); }
-        ;
+function_call : ID '(' paramslist ')' { printf("Function_call: ID(paramslist)\n"); }
+              ;
 
 params : type ID { printf("Params: type id\n"); }
        | expr { printf("Params: expr\n"); }
@@ -129,8 +127,9 @@ condition : expr comparison expr { printf("Condition: expr comparison expr\n"); 
           | '(' condition ')' { printf("Condition: ( condition )\n"); }
           ;
 
-condition_list: condition  { printf("condition_list: condition \n"); }
-            | condition_list comparison condition { printf("condition_list: condition_list comparison condition \n"); }
+condition_list : condition { printf("condition_list: condition\n"); }
+               | condition_list comparison condition { printf("condition_list: condition_list comparison condition\n"); }
+               ;
 
 comparison : EQUAL { printf("Comparison: ==\n"); }
            | NOT_EQUAL { printf("Comparison: !=\n"); }
@@ -155,11 +154,11 @@ for_statement : FOR '(' assignment ';' condition ';' assignment ')' '{' stmlist 
 
 %%
 
-int main (void) {
-    return yyparse ();
+int main(void) {
+    return yyparse();
 }
 
-int yyerror (char *msg) {
-    fprintf (stderr, "%d: %s at '%s'\n", yylineno, msg, yytext);
+int yyerror(char *msg) {
+    fprintf(stderr, "%d: %s at '%s'\n", yylineno, msg, yytext);
     return 0;
 }
