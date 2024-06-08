@@ -6,14 +6,14 @@ YACC = $(DEFAULT_TOOL)
 FLAGS = -d -v
 
 # Source files
-LEX_FILE = lexer.l
-PARSE_FILE = parser.y
+LEX_FILE = src/lexer.l
+PARSE_FILE = src/parser.y
 
 # Executable name
 EXEC = compiler.exe
 
 # Input file
-INPUT_FILE = mergesort.txt
+INPUT_FILE = tests/mergesort.txt
 
 # Output files
 L_OUT_C = lex.yy.c
@@ -46,4 +46,4 @@ run: $(EXEC)
 clean:
 	@echo "Cleaning up..."
 	@rm -f $(L_OUT_C) $(Y_OUT_C) $(Y_OUT_H) $(Y_OUT_O) $(EXEC)
-	@echo "The bomb has been disarmed!"
+	@echo "The bomb has been defused!"

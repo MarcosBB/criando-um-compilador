@@ -36,20 +36,20 @@ make DEFAULT_TOOL=bison
 - **1° passo**
 
 ```bash
-lex lexer.l
+lex src/lexer.l
 ```
 - **2° passo**
 
 Para compilar com `lex` & `yacc`:
 
 ```bash
-yacc parser.y -d -v 
+yacc src/parser.y -d -v 
 ```
 
 Para compilar com `lex` & `bison`:
 
 ```bash
-bison parser.y -d -v
+bison src/parser.y -d -v
 ```
 
 - **3° passo**
