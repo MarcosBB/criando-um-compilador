@@ -21,7 +21,7 @@ extern char *yytext;
 %token <fValue> REAL
 %token <sValue> LIT_STRING P_TYPE
 
-%token WHILE FOR IF ELSE SEMI ASSIGN EQUAL FUNCTION RETURN AND OR NOT NOT_EQUAL INCREMENT DECREMENT IN PLUS MINUS TIMES DIVIDE LESS_EQUAL GREATER_EQUAL LESS GREATER ELIF
+%token WHILE FOR IF ELSE ELIF SEMI ASSIGN EQUAL FUNCTION RETURN AND OR NOT NOT_EQUAL INCREMENT DECREMENT IN PLUS MINUS TIMES DIVIDE LESS_EQUAL GREATER_EQUAL LESS GREATER
 
 %type <sValue> prog stmlist stm assignment var type list function params paramslist condition comparison if_statement while_statement for_statement
 %type <iValue> expr term
@@ -141,17 +141,13 @@ comparison : EQUAL { printf("Comparison: ==\n"); }
            | OR { printf("Comparison: ||\n"); }
            ;
 
-if_statement : IF '(' condition_list ')' '{' stmlist '}' { printf("If statement: if ( condition ) { stmlist }\n"); }
-             | IF '(' condition_list ')' '{' stmlist '}' ELSE '{' stmlist '}' { printf("If statement: if ( condition ) { stmlist } else { stmlist }\n"); }
-             | IF '(' condition_list ')' '{' stmlist '}' elif_list  ELSE '{' stmlist '}' { printf("If statement: if ( condition ) { stmlist } elif( condition) { stmlist } else { stmlist }\n"); }
+if_statement : IF '(' condition_list ')' '{' stmlist '}' { printf("If statement: if ( condition_list ) { stmlist }\n"); }
+             | IF '(' condition_list ')' '{' stmlist '}' else_if_statements { printf("If statement: if ( condition_list ) { stmlist } else_if_statements\n"); }
              ;
 
-elif_list : elif { printf("elif_list\n"); }
-          | elif_list elif { printf("elif_list elif\n"); }
-          ;
-
-elif : ELIF '(' condition_list ')' '{' stmlist'}'
-     ;
+else_if_statements : else_if_statements ELIF '(' condition_list ')' '{' stmlist '}' { printf("Else if statement: elif ( condition list ) { stmlist }\n"); }
+                   | ELSE '{' stmlist '}' { printf("Else statement: else { stmlist }\n"); }
+                   ;
 
 while_statement : WHILE '(' condition_list ')' '{' stmlist '}' { printf("While statement: while ( condition_list ) { stmlist }\n"); }
                 ;
