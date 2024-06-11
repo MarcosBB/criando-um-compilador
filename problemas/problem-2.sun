@@ -2,7 +2,7 @@
 // deles estão nos seguintes intervalos fechados: [0, 25], [26, 50], [51, 75] e 
 // [76, 100]. A entrada de dados deve terminar quando for lido um número negativo.
 
-function void main(){
+function void main() {
     list<int> numbers << [1, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100];
 
     int count0To25 << 0;
@@ -10,12 +10,12 @@ function void main(){
     int count51To75 << 0;
     int count76To100 << 0;
 
-    for (int number in numbers){
-        if (number >= 0 && number <= 25){
+    for (int number in numbers) {
+        if (number >= 0 && number <= 25) {
             count0To25 << count0To25 + 1
-        } elif (number >= 26 && number <= 50){
+        } elif (number >= 26 && number <= 50) {
             count26To50 << count26To50 + 1
-        } elif (number >= 51 && number <= 75){
+        } elif (number >= 51 && number <= 75) {
             count51To75 << count51To75 + 1
         } else {
             count76To100 << count76To100 + 1

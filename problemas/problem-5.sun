@@ -1,0 +1,30 @@
+// Crie um subprograma chamado mdc, com três argumentos n, m (passados por
+// valor) e r (passado por referência), nesta ordem. O subprograma mdc deve calcular
+// o maior divisor comum entre dois números naturais estritamente positivos
+// n e m, de acordo com o seguinte algoritmo recursivo:
+// • Se n for um divisor de m, n é o maior divisor comum de n e m.
+// • Se m for um divisor de n, m é o maior divisor comum de n e m.
+// • Se n não for um divisor de m, e se m for maior que n, então o maior
+// divisor comum de m e n é também o maior divisor comum de n e do resto da divisão de m por n.
+// O subprograma deve retornar seu resultado por meio de parâmetro r, que deve
+// ser posteriormente impresso na tela pelo programa principal
+
+function void mdc(int n, int m, int r) {
+    if (n == 0) {
+        r << m;
+    } else if (m == 0) {
+        r << n;
+    } else if (m > n) {
+        mdc(n, m % n, r);
+    } else {
+        mdc(m, n % m, r);
+    }
+}
+
+function void main() {
+    int n << 48;
+    int m << 18;
+    int r;
+    // mdc(48, 18, r);
+    mdc(n, m, r);
+}
