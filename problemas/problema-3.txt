@@ -31,7 +31,7 @@ function void main(){
 
     print("Soma:");
     if (len(matriz1) == len(matriz2) and len(matriz1[0]) == len(matriz2[0])){
-        somaMatriz(matriz1, matriz2);
+        somaMatriz(matriz1, matriz2)
     }
     else{
         print("Erro!!! As matrizes não sao da mesma ordem.")
@@ -39,7 +39,7 @@ function void main(){
 
     print("Produto:");
     if (len(matriz1[0]) == len(matriz2)){
-        produtoMatriz(matriz1, matriz2);
+        produtoMatriz(matriz1, matriz2)
     }
     else{
         print("Erro!!! O numero de colunas da matriz 1 nao eh igual ao numero de linhas da matriz 2.")
