@@ -143,8 +143,15 @@ comparison : EQUAL { printf("Comparison: ==\n"); }
 
 if_statement : IF '(' condition_list ')' '{' stmlist '}' { printf("If statement: if ( condition ) { stmlist }\n"); }
              | IF '(' condition_list ')' '{' stmlist '}' ELSE '{' stmlist '}' { printf("If statement: if ( condition ) { stmlist } else { stmlist }\n"); }
-             | IF '(' condition_list ')' '{' stmlist '}' elif_list '(' condition_list ')' '{' stmlist'}' ELSE '{' stmlist '}' { printf("If statement: if ( condition ) { stmlist } elif( condition) { stmlist } else { stmlist }\n"); }
+             | IF '(' condition_list ')' '{' stmlist '}' elif_list  ELSE '{' stmlist '}' { printf("If statement: if ( condition ) { stmlist } elif( condition) { stmlist } else { stmlist }\n"); }
              ;
+
+elif_list : elif { printf("elif_list\n"); }
+          | elif_list elif { printf("elif_list elif\n"); }
+          ;
+
+elif : ELIF '(' condition_list ')' '{' stmlist'}'
+     ;
 
 while_statement : WHILE '(' condition_list ')' '{' stmlist '}' { printf("While statement: while ( condition ) { stmlist }\n"); }
                 ;

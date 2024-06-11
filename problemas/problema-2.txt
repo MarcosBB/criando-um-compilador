@@ -17,7 +17,7 @@ function void main(){
             count26To50 << count26To50 + 1
         } elif (number >= 51 && number <= 75){
             count51To75 << count51To75 + 1
-        } elif (number >= 76 && number <= 100){
+        } else {
             count76To100 << count76To100 + 1
         }
     }
