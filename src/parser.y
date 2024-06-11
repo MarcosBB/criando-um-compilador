@@ -65,6 +65,8 @@ stmlist : stm { printf("Statement list: single\n"); }
 assignment : type ID ASSIGN expr { printf("Assignment: type id << expr\n"); }
            | ID ASSIGN expr { printf("Assignment: id << expr\n"); }
            | list_value ASSIGN expr { printf("Assignment: list_value << expr\n"); }
+           | ID INCREMENT { printf("Assignment: id++\n"); }
+           | ID DECREMENT { printf("Assignment: id--\n"); }
            ;
 
 return_statement : RETURN { printf("Return: empty\n"); }
