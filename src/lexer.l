@@ -49,7 +49,7 @@
 "!="                                    return NOT_EQUAL;
 "++"                                    return INCREMENT;
 "--"                                    return DECREMENT;
-[a-zA-Z][a-zA-Z0-9]*                  { yylval.sValue = strdup(yytext); return ID; }
+[a-zA-Z][a-zA-Z0-9]*                    { yylval.sValue = strdup(yytext); return ID; }
 .                                       { printf("invalid character(%s)\n", yytext); exit(0); }
 
 %%

@@ -87,9 +87,9 @@ var : INTEGER { printf("Var: integer\n"); }
     | LIT_STRING { printf("Var: string\n"); }
     ;
 
-var_list : var { printf("var_list: var\n"); }
-         | var_list ',' var { printf("var_list: var_list , var\n"); }
-         | { printf("var_list: empty\n"); }
+var_list : var { printf("Var_list: var\n"); }
+         | var_list ',' var { printf("Var_list , Var\n"); }
+         | { printf("Var_list: empty\n"); }
          ;
 
 type : P_TYPE { printf("Type: P_TYPE\n"); }
@@ -99,12 +99,12 @@ type : P_TYPE { printf("Type: P_TYPE\n"); }
 list : P_TYPE LESS type GREATER { printf("List: P_TYPE < type >\n"); }
      ;
 
-list_value : ID '[' index ']' { printf("list_value: ID[index]\n"); }
-           | '[' var_list ']' { printf("list_value: var_list\n"); }
+list_value : ID '[' index ']' { printf("List_value: ID[index]\n"); }
+           | '[' var_list ']' { printf("List_value: Var_list\n"); }
            ;
 
-index : ID { printf("index: ID\n"); }
-      | INTEGER { printf("index: INTEGER\n"); }
+index : ID { printf("Index: ID\n"); }
+      | INTEGER { printf("Index: INTEGER\n"); }
       ;
 
 function : FUNCTION type ID '(' paramslist ')' '{' stmlist '}' { printf("Function: function definition\n"); }
@@ -127,8 +127,8 @@ condition : expr comparison expr { printf("Condition: expr comparison expr\n"); 
           | '(' condition ')' { printf("Condition: ( condition )\n"); }
           ;
 
-condition_list : condition { printf("condition_list: condition\n"); }
-               | condition_list comparison condition { printf("condition_list: condition_list comparison condition\n"); }
+condition_list : condition { printf("Condition_list: condition\n"); }
+               | condition_list comparison condition { printf("Condition_list: condition_list comparison condition\n"); }
                ;
 
 comparison : EQUAL { printf("Comparison: ==\n"); }
@@ -153,7 +153,7 @@ elif_list : elif { printf("elif_list\n"); }
 elif : ELIF '(' condition_list ')' '{' stmlist'}'
      ;
 
-while_statement : WHILE '(' condition_list ')' '{' stmlist '}' { printf("While statement: while ( condition ) { stmlist }\n"); }
+while_statement : WHILE '(' condition_list ')' '{' stmlist '}' { printf("While statement: while ( condition_list ) { stmlist }\n"); }
                 ;
 
 for_statement : FOR '(' assignment ';' condition ';' assignment ')' '{' stmlist '}' { printf("For statement: for ( assignment ; condition ; assignment ) { stmlist }\n"); }
