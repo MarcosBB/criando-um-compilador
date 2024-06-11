@@ -53,7 +53,7 @@ stm : assignment { printf("Statement: assignment\n"); }
     | while_statement { printf("Statement: while_statement\n"); }
     | for_statement { printf("Statement: for_statement\n"); }
     | expr { printf("Statement: expr\n"); }
-    | return { printf("Statement: return\n"); }
+    | return_statement { printf("Statement: return\n"); }
     | function_call { printf("Statement: function_call\n"); }
     ;
 
@@ -66,9 +66,9 @@ assignment : type ID ASSIGN expr { printf("Assignment: type id << expr\n"); }
            | list_value ASSIGN expr { printf("Assignment: list_value << expr\n"); }
            ;
 
-return : RETURN { printf("Return: empty\n"); }
-       | RETURN expr { printf("Return: expr\n"); }
-       ;
+return_statement : RETURN { printf("Return: empty\n"); }
+                 | RETURN expr { printf("Return: expr\n"); }
+                 ;
 
 expr : term { printf("Expr: term\n"); }
      | expr PLUS term { printf("Expr: expr + term\n"); }
