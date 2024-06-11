@@ -20,6 +20,7 @@ extern char *yytext;
 %token <iValue> INTEGER
 %token <fValue> REAL
 %token <sValue> LIT_STRING P_TYPE
+%token <sValue> BOOLEAN
 
 %token WHILE FOR IF ELSE ELIF SEMI ASSIGN EQUAL FUNCTION RETURN AND OR NOT NOT_EQUAL INCREMENT DECREMENT IN PLUS MINUS TIMES DIVIDE LESS_EQUAL GREATER_EQUAL LESS GREATER
 
@@ -83,6 +84,7 @@ term : var { printf("Term: var\n"); }
 var : INTEGER { printf("Var: integer\n"); }
     | REAL { printf("Var: real\n"); }
     | ID { printf("Var: id\n"); }
+    | BOOLEAN { printf("Var: boolean\n"); }
     | list_value { printf("Var: list_value\n"); }
     | LIT_STRING { printf("Var: string\n"); }
     ;
