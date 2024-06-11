@@ -9,7 +9,7 @@
 [ \t\n]+                                ;  // Ignora espaços em branco
 "\/\/".*"\n"?                           ;  // Ignora comentários
 [0-9]+                                  { yylval.iValue = atoi(yytext); return INTEGER; }
-([[0-9]+"."[0-9]*)|([0-9]*"."[0-9]+])   { yylval.fValue = atof(yytext); return REAL; }
+[0-9]+"."[0-9]*|[0-9]*"."[0-9]+         { yylval.fValue = atof(yytext); return REAL; }
 \"[^\"]*\"                              { yylval.sValue = strdup(yytext); return LIT_STRING; }
 "while"                                 return WHILE;
 "for"                                   return FOR;
