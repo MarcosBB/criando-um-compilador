@@ -21,7 +21,7 @@ extern char *yytext;
 %token <fValue> REAL
 %token <sValue> LIT_STRING P_TYPE
 
-%token WHILE FOR IF ELSE SEMI ASSIGN EQUAL FUNCTION RETURN AND OR NOT NOT_EQUAL INCREMENT DECREMENT IN PLUS MINUS TIMES DIVIDE LESS_EQUAL GREATER_EQUAL LESS GREATER
+%token WHILE FOR IF ELSE SEMI ASSIGN EQUAL FUNCTION RETURN AND OR NOT NOT_EQUAL INCREMENT DECREMENT IN PLUS MINUS TIMES DIVIDE LESS_EQUAL GREATER_EQUAL LESS GREATER ELIF
 
 %type <sValue> prog stmlist stm assignment var type list function params paramslist condition comparison if_statement while_statement for_statement
 %type <iValue> expr term
@@ -141,8 +141,9 @@ comparison : EQUAL { printf("Comparison: ==\n"); }
            | OR { printf("Comparison: ||\n"); }
            ;
 
-if_statement : IF '(' condition ')' '{' stmlist '}' { printf("If statement: if ( condition ) { stmlist }\n"); }
-             | IF '(' condition ')' '{' stmlist '}' ELSE '{' stmlist '}' { printf("If statement: if ( condition ) { stmlist } else { stmlist }\n"); }
+if_statement : IF '(' condition_list ')' '{' stmlist '}' { printf("If statement: if ( condition ) { stmlist }\n"); }
+             | IF '(' condition_list ')' '{' stmlist '}' ELSE '{' stmlist '}' { printf("If statement: if ( condition ) { stmlist } else { stmlist }\n"); }
+             | IF '(' condition_list ')' '{' stmlist '}' elif_list '(' condition_list ')' '{' stmlist'}' ELSE '{' stmlist '}' { printf("If statement: if ( condition ) { stmlist } elif( condition) { stmlist } else { stmlist }\n"); }
              ;
 
 while_statement : WHILE '(' condition_list ')' '{' stmlist '}' { printf("While statement: while ( condition ) { stmlist }\n"); }

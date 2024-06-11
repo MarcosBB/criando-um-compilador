@@ -24,6 +24,7 @@
 "list"                                  { yylval.sValue = strdup(yytext); return P_TYPE; }
 "if"                                    return IF;
 "else"                                  return ELSE;
+"elif"                                  return ELIF;
 "("                                     return yytext[0];
 ")"                                     return yytext[0];
 "{"                                     return yytext[0];
@@ -48,7 +49,7 @@
 "!="                                    return NOT_EQUAL;
 "++"                                    return INCREMENT;
 "--"                                    return DECREMENT;
-[a-zA-Z][a-zA-Z0-9-]*                  { yylval.sValue = strdup(yytext); return ID; }
+[a-zA-Z][a-zA-Z0-9]*                  { yylval.sValue = strdup(yytext); return ID; }
 .                                       { printf("invalid character(%s)\n", yytext); exit(0); }
 
 %%
