@@ -6,9 +6,9 @@
 function void somaMatriz(list<list<int>> matriz1, list<list<int>> matriz2){
     for (int i = 0; i < len(matriz1); i++){
         for (int j = 0; j < len(matriz1[0]); j++){
-            print(matriz[i][j])
+            print(matriz[i][j]);
         }
-        print("\n")
+        print("\n");
     }
 }
 
@@ -31,17 +31,17 @@ function void main(){
 
     print("Soma:");
     if (len(matriz1) == len(matriz2) and len(matriz1[0]) == len(matriz2[0])){
-        somaMatriz(matriz1, matriz2)
+        somaMatriz(matriz1, matriz2);
     }
     else{
-        print("Erro!!! As matrizes não sao da mesma ordem.")
+        print("Erro!!! As matrizes não sao da mesma ordem.");
     }
 
     print("Produto:");
     if (len(matriz1[0]) == len(matriz2)){
-        produtoMatriz(matriz1, matriz2)
+        produtoMatriz(matriz1, matriz2);
     }
     else{
-        print("Erro!!! O numero de colunas da matriz 1 nao eh igual ao numero de linhas da matriz 2.")
+        print("Erro!!! O numero de colunas da matriz 1 nao eh igual ao numero de linhas da matriz 2.");
     }
 }
