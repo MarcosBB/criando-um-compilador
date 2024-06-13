@@ -25,7 +25,7 @@ extern char *yytext;
 %token WHILE FOR IF ELSE ELIF SEMI ASSIGN EQUAL FUNCTION RETURN AND OR NOT NOT_EQUAL INCREMENT DECREMENT IN PLUS MINUS TIMES DIVIDE LESS_EQUAL GREATER_EQUAL LESS GREATER
 
 %type <sValue> prog stmlist stm assignment var type list function params paramslist condition comparison if_statement while_statement for_statement
-%type <iValue> expr term
+%type <sValue> expr term
 
 %left OR
 %left AND
@@ -41,41 +41,43 @@ prog : subprogs_list { printf("Program\n"); }
      ;
 
 subprogs_list : subprog { printf("Subprog_list: subprog\n"); }
-              | subprogs_list SEMI subprog { printf("Subprogs_list: subprogs_list SEMI subprog\n"); }
+              | subprogs_list subprog { printf("Subprogs_list: subprogs_list SEMI subprog\n"); }
               ;
 
 subprog : function { printf("Subprog: function\n"); }
-        | { printf("Subprog: empty\n"); }
+        
         ;
 
-stm : assignment { printf("Statement: assignment\n"); }
+stm : assignment SEMI { printf("Statement: assignment\n"); }
     | function { printf("Statement: function\n"); }
     | if_statement { printf("Statement: if_statement\n"); }
     | while_statement { printf("Statement: while_statement\n"); }
     | for_statement { printf("Statement: for_statement\n"); }
-    | expr { printf("Statement: expr\n"); }
-    | return_statement { printf("Statement: return\n"); }
-    | function_call { printf("Statement: function_call\n"); }
+    | return_statement SEMI { printf("Statement: return\n"); }
+    | function_call SEMI { printf("Statement: function_call\n"); }
     ;
 
 stmlist : stm { printf("Statement list: single\n"); }
-        | stmlist SEMI stm { printf("Statement list: multiple\n"); }
+        | stm stmlist  { printf("Statement list: multiple\n"); }
         ;
 
-assignment : type ID ASSIGN expr { printf("Assignment: type id << expr\n"); }
+assignment : type ID ASSIGN expr{ printf("Assignment: type %s << expr\n", $2); }
+           | type ID ASSIGN function_call {}
            | ID ASSIGN expr { printf("Assignment: id << expr\n"); }
            | list_value ASSIGN expr { printf("Assignment: list_value << expr\n"); }
            | ID INCREMENT { printf("Assignment: id++\n"); }
            | ID DECREMENT { printf("Assignment: id--\n"); }
+           | ID ASSIGN function_call { printf("Assignment: function_call"); }
            ;
 
 return_statement : RETURN { printf("Return: empty\n"); }
                  | RETURN expr { printf("Return: expr\n"); }
                  ;
 
-expr : term { printf("Expr: term\n"); }
+expr : term{ printf("Expr: term\n"); }
      | expr PLUS term { printf("Expr: expr + term\n"); }
      | expr MINUS term { printf("Expr: expr - term\n"); }
+     | '('expr')'{ printf("Expr: (exp)\n"); }
      ;
 
 term : var { printf("Term: var\n"); }
@@ -85,9 +87,9 @@ term : var { printf("Term: var\n"); }
 
 var : INTEGER { printf("Var: integer\n"); }
     | REAL { printf("Var: real\n"); }
+    | list_value { printf("Var: list_value\n"); }
     | ID { printf("Var: id\n"); }
     | BOOLEAN { printf("Var: boolean\n"); }
-    | list_value { printf("Var: list_value\n"); }
     | LIT_STRING { printf("Var: string\n"); }
     ;
 
@@ -114,7 +116,7 @@ index : ID { printf("Index: ID\n"); }
 function : FUNCTION type ID '(' paramslist ')' '{' stmlist '}' { printf("Function: function definition\n"); }
          ;
 
-function_call : ID '(' paramslist ')' { printf("Function_call: ID(paramslist)\n"); }
+function_call : ID '(' paramslist ')'  { printf("Function_call: ID(paramslist)\n"); }
               ;
 
 params : type ID { printf("Params: type id\n"); }
@@ -146,12 +148,13 @@ comparison : EQUAL { printf("Comparison: ==\n"); }
            ;
 
 if_statement : IF '(' condition_list ')' '{' stmlist '}' { printf("If statement: if ( condition_list ) { stmlist }\n"); }
-             | IF '(' condition_list ')' '{' stmlist '}' else_if_statements { printf("If statement: if ( condition_list ) { stmlist } else_if_statements\n"); }
+             | IF '(' condition_list ')' '{' stmlist '}' else_if_statements ELSE  '{' stmlist '}' { printf("If statement: if ( condition_list ) { stmlist } else_if_statements\n"); }
              ;
 
-else_if_statements : else_if_statements ELIF '(' condition_list ')' '{' stmlist '}' { printf("Else if statement: elif ( condition list ) { stmlist }\n"); }
-                   | ELSE '{' stmlist '}' { printf("Else statement: else { stmlist }\n"); }
+else_if_statements : ELIF '(' condition_list ')' '{' stmlist '}' else_if_statements { printf("Else if statement: elif ( condition list ) { stmlist }\n"); }
+                   | { printf("Else if statements: empty\n"); }
                    ;
+
 
 while_statement : WHILE '(' condition_list ')' '{' stmlist '}' { printf("While statement: while ( condition_list ) { stmlist }\n"); }
                 ;

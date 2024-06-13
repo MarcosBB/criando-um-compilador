@@ -4,9 +4,11 @@
     #include <string.h>
     #include "y.tab.h"
 %}
+extern int yylineno = 0;
 
 %%
-[ \t\n]+                                ;  // Ignora espaços em branco
+[ \t]+                             ; //Ignora espaços
+[\n]                            yylineno++ ;  
 "\/\/".*"\n"?                           ;  // Ignora comentários
 [0-9]+                                  { yylval.iValue = atoi(yytext); return INTEGER; }
 [0-9]+"."[0-9]*|[0-9]*"."[0-9]+         { yylval.fValue = atof(yytext); return REAL; }

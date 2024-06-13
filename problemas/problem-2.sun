@@ -12,13 +12,13 @@ function void main() {
 
     for (int number in numbers) {
         if (number >= 0 && number <= 25) {
-            count0To25 << count0To25 + 1
+            count0To25 << count0To25 + 1;
         } elif (number >= 26 && number <= 50) {
-            count26To50 << count26To50 + 1
+            count26To50 << count26To50 + 1;
         } elif (number >= 51 && number <= 75) {
-            count51To75 << count51To75 + 1
+            count51To75 << count51To75 + 1;
         } else {
-            count76To100 << count76To100 + 1
+            count76To100 << count76To100 + 1;
         }
     }
 

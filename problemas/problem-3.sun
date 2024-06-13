@@ -3,8 +3,8 @@
 // matrizes lidas, imprima uma mensagem informando da impossibilidade.
 
 function void somaMatriz(list<list<int>> matriz1, list<list<int>> matriz2) {
-    for (int i = 0; i < len(matriz1); i++) {
-        for (int j = 0; j < len(matriz1[0]); j++) {
+    for (int i << 0; i < len(matriz1); i++) {
+        for (int j << 0; j < len(matriz1[0]); j++) {
             print(matriz[i][j])
         }
         print("\n")
@@ -12,11 +12,11 @@ function void somaMatriz(list<list<int>> matriz1, list<list<int>> matriz2) {
 }
 
 function void produtoMatriz(list<list<int>> matriz1, list<list<int>> matriz2) {
-    for (int i = 0; i < len(matriz1); i++) {
-        for (int j = 0; j < len(matriz2[0]); j++) {
-            int soma = 0;
-            for (int k = 0; k < len(matriz1[0]); k++) {
-                soma = soma + matriz1[i][k] * matriz2[k][j];
+    for (int i << 0; i < len(matriz1); i++) {
+        for (int j << 0; j < len(matriz2[0]); j++) {
+            int soma << 0;
+            for (int k << 0; k < len(matriz1[0]); k++) {
+                soma << soma + matriz1[i][k] * matriz2[k][j];
             }
             print(soma);
         }
@@ -25,8 +25,8 @@ function void produtoMatriz(list<list<int>> matriz1, list<list<int>> matriz2) {
 }
 
 function void main() {
-    list<list<int>>matriz1 = [[1,2,3], [4,5,6]];
-    list<list<int>>matriz2 = [[1,2,3], [4,5,6]];
+    list<list<int>>matriz1 << [[1,2,3], [4,5,6]];
+    list<list<int>>matriz2 << [[1,2,3], [4,5,6]];
 
     print("Soma:");
     if (len(matriz1) == len(matriz2) and len(matriz1[0]) == len(matriz2[0])) {
