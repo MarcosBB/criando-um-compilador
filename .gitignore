@@ -403,7 +403,7 @@ $RECYCLE.BIN/
 # lex
 *.yy.c
 
-# yacc
-*.h
+# yacc & bison
+*.tab.c
+*.tab.h
 *.output
-*.c
