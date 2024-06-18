@@ -12,9 +12,9 @@
 function void mdc(int n, int m, int r) {
     if (n == 0) {
         r << m;
-    } else if (m == 0) {
+    } elif (m == 0) {
         r << n;
-    } else if (m > n) {
+    } elif (m > n) {
         mdc(n, m % n, r);
     } else {
         mdc(m, n % m, r);

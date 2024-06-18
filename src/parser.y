@@ -1,6 +1,8 @@
 %{
 #include <stdio.h>
 #include <stdlib.h>
+#include "./auxiliares/registro/record.h"
+#include "./auxiliares/pilha/pilha.h"
 
 int yylex(void);
 int yyerror(char *s);
@@ -10,22 +12,21 @@ extern char *yytext;
 %}
 
 %union {
-    int    iValue; /* integer value */
-    float  fValue; /* float value */
-    char   cValue; /* char value */
+    struct record * rec;
     char  *sValue; /* string value */
+    bool bValue;
 }
 
 %token <sValue> ID
-%token <iValue> INTEGER
-%token <fValue> REAL
+%token <sValue> INTEGER
+%token <sValue> REAL
 %token <sValue> LIT_STRING P_TYPE
 %token <sValue> BOOLEAN
 
 %token WHILE FOR IF ELSE ELIF SEMI ASSIGN EQUAL FUNCTION RETURN AND OR NOT NOT_EQUAL INCREMENT DECREMENT IN PLUS MINUS TIMES DIVIDE LESS_EQUAL GREATER_EQUAL LESS GREATER
 
-%type <sValue> prog stmlist stm assignment var type list function params paramslist condition comparison if_statement while_statement for_statement
-%type <sValue> expr term
+%type <rec> prog stmlist stm assignment var type list function params paramslist condition comparison if_statement while_statement for_statement 
+%type <rec> expr term var_list list_value
 
 %left OR
 %left AND
@@ -37,7 +38,7 @@ extern char *yytext;
 %start prog
 %%
 
-prog : subprogs_list { printf("Program\n"); }
+prog : subprogs_list { printf("Program\n");  }
      ;
 
 subprogs_list : subprog { printf("Subprog_list: subprog\n"); }
@@ -74,27 +75,30 @@ return_statement : RETURN { printf("Return: empty\n"); }
                  | RETURN expr { printf("Return: expr\n"); }
                  ;
 
-expr : term{ printf("Expr: term\n"); }
-     | expr PLUS term { printf("Expr: expr + term\n"); }
-     | expr MINUS term { printf("Expr: expr - term\n"); }
-     | '('expr')'{ printf("Expr: (exp)\n"); }
+expr : term{ printf("Expr: term\n"); $$ = $1;}
+     | expr PLUS term { printf("Expr: expr + term\n"); $$ = $1 + $3;}
+     | expr MINUS term { printf("Expr: expr - term\n"); $$ = $1 - $3;}
+     | '('expr')'{ printf("Expr: (exp)\n"); $$ = $2;}
      ;
 
-term : var { printf("Term: var\n"); }
-     | term TIMES var { printf("Term: term * var\n"); }
-     | term DIVIDE var { printf("Term: term / var\n"); }
+term : var { printf("Term: var\n"); $$ = $1;}
+     | term TIMES var { printf("Term: term * var\n"); $$ = $1 * $3;}
+     | term DIVIDE var { printf("Term: term / var\n"),; $$ = $1 / $3;}
      ;
 
-var : INTEGER { printf("Var: integer\n"); }
-    | REAL { printf("Var: real\n"); }
-    | list_value { printf("Var: list_value\n"); }
-    | ID { printf("Var: id\n"); }
-    | BOOLEAN { printf("Var: boolean\n"); }
-    | LIT_STRING { printf("Var: string\n"); }
+var : INTEGER { printf("Var: integer\n"); $$ = $1;}
+    | REAL { printf("Var: real\n"); $$ = $1;}
+    | list_value { printf("Var: list_value\n"); $$ = $1; }
+    | ID                        { 
+                                    printf("Var: id\n"); $$ = $1;
+                                    createRecord($1, look_up();
+                                }
+    | BOOLEAN { printf("Var: boolean\n"); $$ = $1;}
+    | LIT_STRING { printf("Var: string\n"); $$ = $1;}
     ;
 
 var_list : var { printf("Var_list: var\n"); }
-         | var_list ',' var { printf("Var_list , Var\n"); }
+         | var_list ',' var { printf("Var_list , Var\n");;}
          | { printf("Var_list: empty\n"); }
          ;
 
@@ -102,11 +106,11 @@ type : P_TYPE { printf("Type: P_TYPE\n"); }
      | list { printf("Type: list\n"); }
      ;
 
-list : P_TYPE LESS type GREATER { printf("List: P_TYPE < type >\n"); }
+list : P_TYPE LESS type GREATER { printf("List: P_TYPE < type >\n");}
      ;
 
-list_value : ID '[' index ']' { printf("List_value: ID[index]\n"); }
-           | '[' var_list ']' { printf("List_value: Var_list\n"); }
+list_value : ID '[' index ']' { printf("List_value: ID[index]\n"); $$ = $1}
+           | '[' var_list ']' { printf("List_value: Var_list\n");}
            ;
 
 index : ID { printf("Index: ID\n"); }
