@@ -46,7 +46,6 @@ subprogs_list : subprog { printf("Subprog_list: subprog\n"); }
               ;
 
 subprog : function { printf("Subprog: function\n"); }
-        
         ;
 
 stm : assignment SEMI { printf("Statement: assignment\n"); }
@@ -62,7 +61,7 @@ stmlist : stm { printf("Statement list: single\n"); }
         | stm stmlist  { printf("Statement list: multiple\n"); }
         ;
 
-assignment : type ID ASSIGN expr{ printf("Assignment: type %s << expr\n", $2); }
+assignment : type ID ASSIGN expr { printf("Assignment: type %s << expr\n", $2); }
            | type ID ASSIGN function_call {}
            | ID ASSIGN expr { printf("Assignment: id << expr\n"); }
            | list_value ASSIGN expr { printf("Assignment: list_value << expr\n"); }
@@ -75,30 +74,30 @@ return_statement : RETURN { printf("Return: empty\n"); }
                  | RETURN expr { printf("Return: expr\n"); }
                  ;
 
-expr : term{ printf("Expr: term\n"); $$ = $1;}
-     | expr PLUS term { printf("Expr: expr + term\n"); $$ = $1 + $3;}
-     | expr MINUS term { printf("Expr: expr - term\n"); $$ = $1 - $3;}
-     | '('expr')'{ printf("Expr: (exp)\n"); $$ = $2;}
+expr : term { printf("Expr: term\n"); $$ = $1; }
+     | expr PLUS term { printf("Expr: expr + term\n"); $$ = $1 + $3; }
+     | expr MINUS term { printf("Expr: expr - term\n"); $$ = $1 - $3; }
+     | '(' expr ')' { printf("Expr: (exp)\n"); $$ = $2; }
      ;
 
-term : var { printf("Term: var\n"); $$ = $1;}
-     | term TIMES var { printf("Term: term * var\n"); $$ = $1 * $3;}
-     | term DIVIDE var { printf("Term: term / var\n"),; $$ = $1 / $3;}
+term : var { printf("Term: var\n"); $$ = $1; }
+     | term TIMES var { printf("Term: term * var\n"); $$ = $1 * $3; }
+     | term DIVIDE var { printf("Term: term / var\n"); $$ = $1 / $3; }
      ;
 
-var : INTEGER { printf("Var: integer\n"); $$ = $1;}
-    | REAL { printf("Var: real\n"); $$ = $1;}
+var : INTEGER { printf("Var: integer\n"); $$ = $1; }
+    | REAL { printf("Var: real\n"); $$ = $1; }
+    | ID {
+            printf("Var: id\n"); $$ = $1;
+            createRecord($1, look_up());
+        }
+    | BOOLEAN { printf("Var: boolean\n"); $$ = $1; }
+    | LIT_STRING { printf("Var: string\n"); $$ = $1; }
     | list_value { printf("Var: list_value\n"); $$ = $1; }
-    | ID                        { 
-                                    printf("Var: id\n"); $$ = $1;
-                                    createRecord($1, look_up();
-                                }
-    | BOOLEAN { printf("Var: boolean\n"); $$ = $1;}
-    | LIT_STRING { printf("Var: string\n"); $$ = $1;}
     ;
 
 var_list : var { printf("Var_list: var\n"); }
-         | var_list ',' var { printf("Var_list , Var\n");;}
+         | var_list ',' var { printf("Var_list , Var\n"); }
          | { printf("Var_list: empty\n"); }
          ;
 
@@ -106,11 +105,11 @@ type : P_TYPE { printf("Type: P_TYPE\n"); }
      | list { printf("Type: list\n"); }
      ;
 
-list : P_TYPE LESS type GREATER { printf("List: P_TYPE < type >\n");}
+list : P_TYPE LESS type GREATER { printf("List: P_TYPE < type >\n"); }
      ;
 
-list_value : ID '[' index ']' { printf("List_value: ID[index]\n"); $$ = $1}
-           | '[' var_list ']' { printf("List_value: Var_list\n");}
+list_value : ID '[' index ']' { printf("List_value: ID[index]\n"); $$ = $1; }
+           | '[' var_list ']' { printf("List_value: Var_list\n"); }
            ;
 
 index : ID { printf("Index: ID\n"); }
@@ -120,7 +119,7 @@ index : ID { printf("Index: ID\n"); }
 function : FUNCTION type ID '(' paramslist ')' '{' stmlist '}' { printf("Function: function definition\n"); }
          ;
 
-function_call : ID '(' paramslist ')'  { printf("Function_call: ID(paramslist)\n"); }
+function_call : ID '(' paramslist ')' { printf("Function_call: ID(paramslist)\n"); }
               ;
 
 params : type ID { printf("Params: type id\n"); }
@@ -158,7 +157,6 @@ if_statement : IF '(' condition_list ')' '{' stmlist '}' { printf("If statement:
 else_if_statements : ELIF '(' condition_list ')' '{' stmlist '}' else_if_statements { printf("Else if statement: elif ( condition list ) { stmlist }\n"); }
                    | { printf("Else if statements: empty\n"); }
                    ;
-
 
 while_statement : WHILE '(' condition_list ')' '{' stmlist '}' { printf("While statement: while ( condition_list ) { stmlist }\n"); }
                 ;
