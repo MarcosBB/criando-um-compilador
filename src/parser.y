@@ -3,11 +3,15 @@
 #include <stdlib.h>
 #include "./auxiliares/registro/record.h"
 #include "./auxiliares/pilha/pilha.h"
+#include "./auxiliares/hash_table/hash_table.h"
 
 int yylex(void);
 int yyerror(char *s);
 extern int yylineno;
 extern char *yytext;
+
+hash_table_base *hash_table = hash_table_create();
+Stack * stack = createStack();
 
 %}
 
