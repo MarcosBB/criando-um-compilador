@@ -1,23 +1,29 @@
-#ifndef STACK
-#define STACK
+// doubly_linked_list.h
 
-typedef struct Node {
-    char *var;
-    struct Node *next;
-} Node;
+#ifndef DOUBLY_LINKED_LIST_H
+#define DOUBLY_LINKED_LIST_H
 
-typedef struct Stack {
-    Node *top;
-} Stack;
+#include <stdio.h>
+#include <stdlib.h>
 
-Stack* createStack();
+// Estrutura de nó da lista duplamente encadeada
+struct node {
+    int data;
+    struct node* next;
+    struct node* prev;
+};
 
-void push(Stack *stack, const char *escopo, const char *type);
+// Declaração dos ponteiros para a cabeça e a cauda da lista
+extern struct node* head;
+extern struct node* tail;
 
-void pop(Stack *stack);
+// Funções para manipulação da lista duplamente encadeada
+struct node* create_node(int data);
+void insert_at_head(int data);
+void insert_at_tail(int data);
+void delete_at_head();
+void delete_at_tail();
+void display_forward();
+void display_backward();
 
-Node* top(Stack *stack);
-
-void freeStack(Stack *stack);
-
-#endif
+#endif // DOUBLY_LINKED_LIST_H
