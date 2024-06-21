@@ -2,10 +2,11 @@
 // list 
 #include <stdio.h> 
 #include <stdlib.h> 
+#include "pilha.h"
 
 // doubly linked list node template 
 struct node { 
-	int data; 
+	char * data; 
 	struct node* next; 
 	struct node* prev; 
 }; 
@@ -16,7 +17,7 @@ struct node* tail = NULL;
 
 // create a new node with the given data and return a 
 // pointer to it 
-struct node* create_node(int data) 
+struct node* create_node(char * data) 
 { 
 	struct node* new_node 
 		= (struct node*)malloc(sizeof(struct node)); 
@@ -27,7 +28,7 @@ struct node* create_node(int data)
 } 
 
 // insert a node at the beginning of the list 
-void insert_at_head(int data) 
+void insert_at_head(char * data) 
 { 
 	struct node* new_node = create_node(data); 
 	if (head == NULL) { 
@@ -42,7 +43,7 @@ void insert_at_head(int data)
 } 
 
 // insert a node at the end of the list 
-void insert_at_tail(int data) 
+void insert_at_tail(char * data) 
 { 
 	struct node* new_node = create_node(data); 
 	if (tail == NULL) { 
@@ -114,18 +115,4 @@ void display_backward()
 	printf("\n"); 
 } 
 
-// Driver code to test the doubly linked list 
-int main() 
-{ 
-	insert_at_head(10); 
-	insert_at_head(20); 
-	insert_at_tail(30); 
-	display_forward(); // expected output: 20 10 30 
-	display_backward(); // expected output: 30 10 20 
-	delete_at_head(); 
-	delete_at_tail(); 
-	display_forward(); // expected output: 10 
-	display_backward(); // expected output: 10 
 
-	return 0; 
-}

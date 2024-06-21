@@ -21,7 +21,7 @@ extern int yylineno = 0;
 "void"                                  { yylval.sValue = strdup(yytext); return P_TYPE; }
 "int"                                   { yylval.sValue = strdup(yytext); return P_TYPE; }
 "float"                                 { yylval.sValue = strdup(yytext); return P_TYPE; }
-"bool"                                  { yylval.sValue = strdup(yytext); return P_TYPE; }
+
 "string"                                { yylval.sValue = strdup(yytext); return P_TYPE; }
 "list"                                  { yylval.sValue = strdup(yytext); return P_TYPE; }
 "if"                                    { return IF; }

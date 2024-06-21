@@ -8,7 +8,7 @@
 
 // Estrutura de nó da lista duplamente encadeada
 struct node {
-    int data;
+    char * data;
     struct node* next;
     struct node* prev;
 };
@@ -18,9 +18,9 @@ extern struct node* head;
 extern struct node* tail;
 
 // Funções para manipulação da lista duplamente encadeada
-struct node* create_node(int data);
-void insert_at_head(int data);
-void insert_at_tail(int data);
+struct node* create_node(char * data);
+void insert_at_head(char * data);
+void insert_at_tail(char * data);
 void delete_at_head();
 void delete_at_tail();
 void display_forward();

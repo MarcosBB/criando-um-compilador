@@ -3,29 +3,32 @@
 #include <stdlib.h>
 #include "./auxiliares/registro/record.h"
 #include "./auxiliares/pilha/pilha.h"
-#include "./auxiliares/hash_table/hash_table.h"
+#include "./auxiliares/hash_table/hash-table.h"
 
 int yylex(void);
 int yyerror(char *s);
 extern int yylineno;
 extern char *yytext;
 
-hash_table_base *hash_table = hash_table_create();
-Stack * stack = createStack();
+hash_table_base *symbols_table;
+hash_table_base *abstractions_table;
+struct node *head;
+
+
 
 %}
 
 %union {
     struct record * rec;
+    int iValue;
+    float fValue;
     char  *sValue; /* string value */
-    bool bValue;
 }
 
 %token <sValue> ID
-%token <sValue> INTEGER
-%token <sValue> REAL
+%token <iValue> INTEGER
+%token <fValue> REAL
 %token <sValue> LIT_STRING P_TYPE
-%token <sValue> BOOLEAN
 
 %token WHILE FOR IF ELSE ELIF SEMI ASSIGN EQUAL FUNCTION RETURN AND OR NOT NOT_EQUAL INCREMENT DECREMENT IN PLUS MINUS TIMES DIVIDE LESS_EQUAL GREATER_EQUAL LESS GREATER
 
@@ -42,7 +45,7 @@ Stack * stack = createStack();
 %start prog
 %%
 
-prog : subprogs_list { printf("Program\n");  }
+prog : subprogs_list { printf("Program\n"); printf("node value : %s\n", head -> data);  }
      ;
 
 subprogs_list : subprog { printf("Subprog_list: subprog\n"); }
@@ -78,26 +81,25 @@ return_statement : RETURN { printf("Return: empty\n"); }
                  | RETURN expr { printf("Return: expr\n"); }
                  ;
 
-expr : term { printf("Expr: term\n"); $$ = $1; }
-     | expr PLUS term { printf("Expr: expr + term\n"); $$ = $1 + $3; }
-     | expr MINUS term { printf("Expr: expr - term\n"); $$ = $1 - $3; }
-     | '(' expr ')' { printf("Expr: (exp)\n"); $$ = $2; }
+expr : term { printf("Expr: term\n"); }
+     | expr PLUS term { printf("Expr: expr + term\n");  }
+     | expr MINUS term { printf("Expr: expr - term\n");  }
+     | '(' expr ')' { printf("Expr: (exp)\n");}
      ;
 
-term : var { printf("Term: var\n"); $$ = $1; }
-     | term TIMES var { printf("Term: term * var\n"); $$ = $1 * $3; }
-     | term DIVIDE var { printf("Term: term / var\n"); $$ = $1 / $3; }
+term : var { printf("Term: var\n"); }
+     | term TIMES var { printf("Term: term * var\n"); }
+     | term DIVIDE var { printf("Term: term / var\n");  }
      ;
 
-var : INTEGER { printf("Var: integer\n"); $$ = $1; }
-    | REAL { printf("Var: real\n"); $$ = $1; }
+var : INTEGER { printf("Var: integer\n"); }
+    | REAL { printf("Var: real\n");  }
     | ID {
-            printf("Var: id\n"); $$ = $1;
-            createRecord($1, look_up());
+            printf("Var: id\n"); ;
+            
         }
-    | BOOLEAN { printf("Var: boolean\n"); $$ = $1; }
-    | LIT_STRING { printf("Var: string\n"); $$ = $1; }
-    | list_value { printf("Var: list_value\n"); $$ = $1; }
+    | LIT_STRING { printf("Var: string\n");  }
+    | list_value { printf("Var: list_value\n");  }
     ;
 
 var_list : var { printf("Var_list: var\n"); }
@@ -112,7 +114,7 @@ type : P_TYPE { printf("Type: P_TYPE\n"); }
 list : P_TYPE LESS type GREATER { printf("List: P_TYPE < type >\n"); }
      ;
 
-list_value : ID '[' index ']' { printf("List_value: ID[index]\n"); $$ = $1; }
+list_value : ID '[' index ']' { printf("List_value: ID[index]\n");  }
            | '[' var_list ']' { printf("List_value: Var_list\n"); }
            ;
 
@@ -172,6 +174,12 @@ for_statement : FOR '(' assignment ';' condition ';' assignment ')' '{' stmlist 
 %%
 
 int main(void) {
+    symbols_table = hash_table_create();
+    abstractions_table = hash_table_create();
+    hash_table_set(symbols_table,"A", "int");
+    printf("symbol: %s / type: %s.\n", "A", hash_table_get(symbols_table, "A") );
+    head = malloc(sizeof(struct node));
+    head->data = "teste";
     return yyparse();
 }
 
