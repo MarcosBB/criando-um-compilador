@@ -6,6 +6,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+
+
 // Estrutura de nó da lista duplamente encadeada
 struct node {
     char * data;
@@ -25,5 +27,6 @@ void delete_at_head();
 void delete_at_tail();
 void display_forward();
 void display_backward();
+char* top();
 
 #endif // DOUBLY_LINKED_LIST_H

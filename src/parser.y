@@ -10,9 +10,11 @@ int yyerror(char *s);
 extern int yylineno;
 extern char *yytext;
 
+char * cat(char *, char *, char *, char *, char *);
+
 hash_table_base *symbols_table;
 hash_table_base *abstractions_table;
-struct node *head;
+struct node *escopo_stack;
 
 
 
@@ -28,12 +30,12 @@ struct node *head;
 %token <sValue> ID
 %token <iValue> INTEGER
 %token <fValue> REAL
-%token <sValue> LIT_STRING P_TYPE
+%token <sValue> LIT_STRING P_TYPE 
 
-%token WHILE FOR IF ELSE ELIF SEMI ASSIGN EQUAL FUNCTION RETURN AND OR NOT NOT_EQUAL INCREMENT DECREMENT IN PLUS MINUS TIMES DIVIDE LESS_EQUAL GREATER_EQUAL LESS GREATER
+%token <sValue> WHILE FOR IF ELSE ELIF SEMI ASSIGN EQUAL FUNCTION RETURN AND OR NOT NOT_EQUAL INCREMENT DECREMENT IN PLUS MINUS TIMES DIVIDE LESS_EQUAL GREATER_EQUAL LESS GREATER
 
-%type <rec> prog stmlist stm assignment var type list function params paramslist condition comparison if_statement while_statement for_statement 
-%type <rec> expr term var_list list_value
+%type <rec> prog stmlist stm variable_decl assignment var type list function params paramslist condition comparison if_statement while_statement for_statement subprog
+%type <rec> expr term var_list list_value subprogs_list
 
 %left OR
 %left AND
@@ -45,28 +47,42 @@ struct node *head;
 %start prog
 %%
 
-prog : subprogs_list { printf("Program\n"); printf("node value : %s\n", head -> data);  }
+prog : subprogs_list { printf("Program\n"); printf("C code\n"); printf("%s\n", $1 -> code);}
      ;
 
-subprogs_list : subprog { printf("Subprog_list: subprog\n"); }
-              | subprogs_list subprog { printf("Subprogs_list: subprogs_list SEMI subprog\n"); }
+subprogs_list : subprog { printf("Subprog_list: subprog\n"); $$ = createRecord($1 ->code, "");}
+              | subprogs_list subprog { printf("Subprogs_list: subprogs_list SEMI subprog\n"); $$ = createRecord($1 ->code, "");}
               ;
 
-subprog : function { printf("Subprog: function\n"); }
+subprog : function { printf("Subprog: function = %s\n", $1 -> code); $$ = createRecord($1 -> code, "");}
         ;
 
 stm : assignment SEMI { printf("Statement: assignment\n"); }
-    | function { printf("Statement: function\n"); }
+    | function { printf("Statement: function\n"); $$ = createRecord($1->code, "");}
     | if_statement { printf("Statement: if_statement\n"); }
     | while_statement { printf("Statement: while_statement\n"); }
     | for_statement { printf("Statement: for_statement\n"); }
     | return_statement SEMI { printf("Statement: return\n"); }
     | function_call SEMI { printf("Statement: function_call\n"); }
+    | variable_decl SEMI { printf("Statement: variable_decl = %s\n", $1 -> code); }
     ;
 
 stmlist : stm { printf("Statement list: single\n"); }
         | stm stmlist  { printf("Statement list: multiple\n"); }
         ;
+
+variable_decl: type ID                                  {printf("Variable Declaration: %s \n", $2);
+                                                            char *escopo = top();
+                                                            char *key = cat(escopo, "#", $2, "", "");
+                                                            
+                                                            
+                                                           
+                                                            hash_table_set(symbols_table, key, $1 -> type);
+                                                            char* s1 = cat($1 -> code, " ", $2, "","");
+                                                            $$ = createRecord(s1, "");
+                                                       
+                                                            }
+            ;
 
 assignment : type ID ASSIGN expr { printf("Assignment: type %s << expr\n", $2); }
            | type ID ASSIGN function_call {}
@@ -107,8 +123,10 @@ var_list : var { printf("Var_list: var\n"); }
          | { printf("Var_list: empty\n"); }
          ;
 
-type : P_TYPE { printf("Type: P_TYPE\n"); }
-     | list { printf("Type: list\n"); }
+type : P_TYPE                           { printf("Type: P_TYPE\n"); 
+                                                $$ = createRecord($1, "");
+                                                }
+     | list { printf("Type: list\n"); $$ = $1;}
      ;
 
 list : P_TYPE LESS type GREATER { printf("List: P_TYPE < type >\n"); }
@@ -122,19 +140,34 @@ index : ID { printf("Index: ID\n"); }
       | INTEGER { printf("Index: INTEGER\n"); }
       ;
 
-function : FUNCTION type ID '(' paramslist ')' '{' stmlist '}' { printf("Function: function definition\n"); }
+function : FUNCTION type ID '(' paramslist ')' '{' stmlist '}' { printf("Function: function definition\n"); 
+                                                                    char *s1 = cat($1, " ", $2->code, " ", $3);
+                                                                    char *s2 = cat(s1, " ", "(", $5->code, ")");
+                                                                    char *s3 = cat(s2, "{", $8->code, "}", "");
+
+                                                                    printf("s3 of function declaration: %s", s3);
+                                                                }
          ;
 
 function_call : ID '(' paramslist ')' { printf("Function_call: ID(paramslist)\n"); }
               ;
 
-params : type ID { printf("Params: type id\n"); }
-       | expr { printf("Params: expr\n"); }
-       | { printf("Params: empty\n"); }
+params : type ID                                        { printf("Params: type id\n"); 
+                                                            char *s1 = cat($1->code, " ", $2, "", "");
+                                                            char *key = cat(top(), "#", $2, "", "");
+
+                                                            hash_table_set(symbols_table, key, $1->type);
+                                                            $$ = createRecord(s1, "");
+                                                        }
+       | expr { printf("Params: expr\n"); $$ = createRecord($1 -> code, "");}
+       | { printf("Params: empty\n"); $$ = createRecord("", "");};
        ;
 
-paramslist : params { printf("Params list: single\n"); }
-           | params ',' paramslist { printf("Params list: multiple\n"); }
+paramslist : params { printf("Params list: single\n"); $$ = createRecord($1 -> code, "");}
+           | params ',' paramslist                              { printf("Params list: multiple\n"); 
+                                                                    char *s1 = cat($1->code, ",", $3->code, "","");
+                                                                    $$ = createRecord(s1, "");
+                                                                }
            ;
 
 condition : expr comparison expr { printf("Condition: expr comparison expr\n"); }
@@ -176,14 +209,30 @@ for_statement : FOR '(' assignment ';' condition ';' assignment ')' '{' stmlist 
 int main(void) {
     symbols_table = hash_table_create();
     abstractions_table = hash_table_create();
-    hash_table_set(symbols_table,"A", "int");
-    printf("symbol: %s / type: %s.\n", "A", hash_table_get(symbols_table, "A") );
-    head = malloc(sizeof(struct node));
-    head->data = "teste";
+    escopo_stack = malloc(sizeof(struct node));
+    insert_at_head("main");
+    char *a_symbol = cat(top(), "#","A","","");
+    hash_table_set(symbols_table,a_symbol, "float");
     return yyparse();
 }
 
 int yyerror(char *msg) {
     fprintf(stderr, "%d: %s at '%s'\n", yylineno, msg, yytext);
     return 0;
+}
+char * cat(char * s1, char * s2, char * s3, char * s4, char * s5){
+  int tam;
+  char * output;
+
+  tam = strlen(s1) + strlen(s2) + strlen(s3) + strlen(s4) + strlen(s5)+ 1;
+  output = (char *) malloc(sizeof(char) * tam);
+  
+  if (!output){
+    printf("Allocation problem. Closing application...\n");
+    exit(0);
+  }
+  
+  sprintf(output, "%s%s%s%s%s", s1, s2, s3, s4, s5);
+  
+  return output;
 }

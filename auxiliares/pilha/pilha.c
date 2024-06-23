@@ -4,12 +4,14 @@
 #include <stdlib.h> 
 #include "pilha.h"
 
+
+
 // doubly linked list node template 
-struct node { 
-	char * data; 
-	struct node* next; 
-	struct node* prev; 
-}; 
+// struct node { 
+// 	char * data; 
+// 	struct node* next; 
+// 	struct node* prev; 
+// }; 
 
 // creating a pointer to head and tail of the linked list 
 struct node* head = NULL; 
@@ -93,12 +95,16 @@ void delete_at_tail()
 	free(temp); 
 } 
 
+char* top() {
+    return tail -> data;
+}
+
 // display the list in forward direction 
 void display_forward() 
 { 
 	struct node* current = head; 
 	while (current != NULL) { 
-		printf("%d ", current->data); 
+		printf("%s ", current->data); 
 		current = current->next; 
 	} 
 	printf("\n"); 
@@ -109,7 +115,7 @@ void display_backward()
 { 
 	struct node* current = tail; 
 	while (current != NULL) { 
-		printf("%d ", current->data); 
+		printf("%s ", current->data); 
 		current = current->prev; 
 	} 
 	printf("\n"); 
