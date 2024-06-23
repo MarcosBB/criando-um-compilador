@@ -10,8 +10,8 @@ extern int yylineno = 0;
 [ \t]+                                  ; // Ignora espaços e tabulações
 [\n]                                    { yylineno++; }
 "\/\/".*"\n"?                           ; // Ignora comentários
-[0-9]+                                  { yylval.iValue = atoi(yytext); return INTEGER; }
-[0-9]+"."[0-9]*|[0-9]*"."[0-9]+         { yylval.fValue = atof(yytext); return REAL; }
+[0-9]+                                  { yylval.sValue = strdup(yytext); return INTEGER; }
+[0-9]+"."[0-9]*|[0-9]*"."[0-9]+         { yylval.sValue = strdup(yytext); return REAL; }
 \"[^\"]*\"                              { yylval.sValue = strdup(yytext); return LIT_STRING; }
 "while"                                 { return WHILE; }
 "for"                                   { return FOR; }
