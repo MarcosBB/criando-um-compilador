@@ -16,9 +16,6 @@ char * cat(char *, char *, char *, char *, char *);
 hash_table_base *symbols_table;
 hash_table_base *abstractions_table;
 struct node *escopo_stack;
-
-
-
 %}
 
 %union {
@@ -48,286 +45,253 @@ struct node *escopo_stack;
 %start prog
 %%
 
-prog : subprogs_list main                   {
-                                                
-                                                printf("%s %s\n", $1 -> code, $2 -> code);
-                                                char *s = cat($1 -> code, "\n",  $2 -> code, "", "");
-                                                fprintf(yyout, "%s", s);
+prog : subprogs_list main {
+        printf("%s %s\n", $1->code, $2->code);
+        char *s = cat($1->code, "\n",  $2->code, "", "");
+        fprintf(yyout, "%s", s);
+        free(s);
+        freeRecord($1);
+        freeRecord($2);
+        free(escopo_stack);
+        free(symbols_table);
+        free(abstractions_table);
+    }
+    ;
 
-                                                free(s);
-                                                freeRecord($1);
-                                                freeRecord($2);
-                                                free(escopo_stack);
-                                                free(symbols_table);
-                                                free(abstractions_table);
-                                            }
-     ;
+main : FUNCTION type MAIN '(' ')' '{' stmlist '}' {
+        char *s = cat("int main(){\n", $7->code, "}", "", "");
+        freeRecord($7);
+        $$ = createRecord(s, "");
+        free(s);
+    }
+    ;
 
-main : FUNCTION type MAIN '(' ')''{'stmlist '}'           {
-                                                                        char * s = cat("int main(){\n", $7->code, "}", "", "");
-                                                                        freeRecord($7);
-                                                                        $$ = createRecord(s, "");
-                                                                        free(s);
-                                                                    }
-          ;
-
-subprogs_list : subprog                     {
-                                                printf("Subprog_list: subprog\n");
-                                                $$ = createRecord($1 ->code, "");
-                                                freeRecord($1);
-                                            }
-              | subprogs_list subprog       {
-                                                printf("Subprogs_list: %s ; %s\n", $1->code, $2->code);
-                                                char *s1 = cat($1->code,"\n", $2->code, "","");
-
-                                                $$ = createRecord(s1, "");
-                                                free(s1);
-                                                freeRecord($1);
-                                                freeRecord($2);
-                                            }
-              ;
+subprogs_list : subprog {
+        printf("Subprog_list: subprog\n");
+        $$ = createRecord($1->code, "");
+        freeRecord($1);
+    }
+    | subprogs_list subprog {
+        printf("Subprogs_list: %s ; %s\n", $1->code, $2->code);
+        char *s1 = cat($1->code, "\n", $2->code, "", "");
+        $$ = createRecord(s1, "");
+        free(s1);
+        freeRecord($1);
+        freeRecord($2);
+    }
+    ;
 
 subprog : FUNCTION type ID '(' paramslist ')' '{' stmlist '}' { 
-                                        char *s1 = cat($2->type, " ", $3, "","");
-                                        char *s2 = cat(s1, "(", $5->code, ")","");
-                                        char *s3 = cat(s2, "{\n", "\t", $8->code, "}");
-                                        printf("Subprog: %s\n",s3);
-
-                            
-                                        $$ = createRecord(s3,"");
-                                        free(s1);
-                                        free(s2);
-                                        free(s3);
-                                        freeRecord($2);
-                                        freeRecord($5);
-                                        freeRecord($8);
-                                        free($3);
-                                    }
-         ;
+        char *s1 = cat($2->type, " ", $3, "","");
+        char *s2 = cat(s1, "(", $5->code, ")","");
+        char *s3 = cat(s2, "{\n", "\t", $8->code, "}");
+        printf("Subprog: %s\n", s3);
+        $$ = createRecord(s3, "");
+        free(s1);
+        free(s2);
+        free(s3);
+        freeRecord($2);
+        freeRecord($5);
+        freeRecord($8);
+        free($3);
+    }
+    ;
 
 stm : assignment SEMI {
-                        printf("Statement: %s;\n", $1->code);
-
-                        char *s1 = cat($1->code, ";\n","","", "");
-                        $$ = createRecord(s1, "");
-
-                        free(s1);
-                        freeRecord($1);
-                    }
+        printf("Statement: %s;\n", $1->code);
+        char *s1 = cat($1->code, ";\n", "", "", "");
+        $$ = createRecord(s1, "");
+        free(s1);
+        freeRecord($1);
+    }
     | if_statement { printf("Statement: if_statement\n"); }
     | while_statement { printf("Statement: while_statement\n"); }
     | for_statement { printf("Statement: for_statement\n"); }
-    | return SEMI                      {
-                                                printf("Statement: return %s\n", $1->code);
-                                                char *s1 = cat("\t", $1->code, ";\n" , "","");
-
-                                                $$ = createRecord(s1,"");
-                                                freeRecord($1);
-                                                free(s1);
-                                            }
-    | function_call SEMI                    {
-                                                printf("Statement: function_call\n");
-                                                char *s1 = cat($1->code, ";\n","","","");
-                                                $$ = createRecord(s1,"");
-                                                freeRecord($1);
-                                                free(s1);
-                                            }
-    | variable_decl SEMI                    {
-                                                printf("Statement: variable_decl = %s\n", $1 -> code);
-
-                                                char *s1 = cat($1->code, ";\n","","","");
-                                                printf("%s\n", ";");
-                                                printf("%s\n", s1);
-                                                $$ = createRecord(s1, "");
-                                                free(s1);
-                                                freeRecord($1);
-                                            }
-    | print_command SEMI                    {
-                                                printf("Statement: print_command = %s\n", $1 -> code);
-
-                                                char *s1 = cat("\t", $1->code, ";\n","","");
-                                                printf("%s\n", ";");
-                                                printf("%s\n", s1);
-                                                $$ = createRecord(s1, "");
-                                                free(s1);
-                                                freeRecord($1);
-                                            }
+    | return SEMI {
+        printf("Statement: return %s\n", $1->code);
+        char *s1 = cat("\t", $1->code, ";\n", "", "");
+        $$ = createRecord(s1, "");
+        freeRecord($1);
+        free(s1);
+    }
+    | function_call SEMI {
+        printf("Statement: function_call\n");
+        char *s1 = cat($1->code, ";\n", "", "", "");
+        $$ = createRecord(s1, "");
+        freeRecord($1);
+        free(s1);
+    }
+    | variable_decl SEMI {
+        printf("Statement: variable_decl = %s\n", $1->code);
+        char *s1 = cat($1->code, ";\n", "", "", "");
+        printf("%s\n", ";");
+        printf("%s\n", s1);
+        $$ = createRecord(s1, "");
+        free(s1);
+        freeRecord($1);
+    }
+    | print_command SEMI {
+        printf("Statement: print_command = %s\n", $1->code);
+        char *s1 = cat("\t", $1->code, ";\n", "", "");
+        printf("%s\n", ";");
+        printf("%s\n", s1);
+        $$ = createRecord(s1, "");
+        free(s1);
+        freeRecord($1);
+    }
     ;
 
-stmlist : stm                                   { 
-                                                    printf("Statement list: %s\n", $1->code);
+stmlist : stm {
+        printf("Statement list: %s\n", $1->code);
+        $$ = createRecord($1->code, "");
+        freeRecord($1);
+    }
+    | stm stmlist {
+        printf("Statement list: multiple\n");
+        char *s1 = cat($1->code, $2->code, "", "", "");
+        $$ = createRecord(s1, "");
+        freeRecord($1);
+        freeRecord($2);
+        free(s1);
+    }
+    ;
 
-                                                    $$ = createRecord($1->code, "");
-                                                    freeRecord($1);
-                                                }
-        | stm stmlist                           { 
-                                                    printf("Statement list: multiple\n");
-                                                    char *s1 = cat($1->code, $2->code, "", "","");
-                                                    $$ = createRecord(s1, "");
-                                                    freeRecord($1);
-                                                    freeRecord($2);
-                                                    free(s1);
-                                                }
-        ;
-
-variable_decl: type ID {
+variable_decl : type ID {
         printf("Variable Declaration: %s \n", $2);
         char *escopo = top();
         char *key = cat(escopo, "#", $2, "", "");
-        hash_table_set(symbols_table, key, $1 -> type);
-        char* s1 = cat($1 -> code, " ", $2, "","");
+        hash_table_set(symbols_table, key, $1->type);
+        char *s1 = cat($1->code, " ", $2, "", "");
         $$ = createRecord(s1, "");
     }
     ;
 
-assignment : type ID ASSIGN expr            {
-                                                char *s1 = cat($1->type, " ", $2, " ", "=");
-                                                char *s2 = cat(s1, " ", $4->code,"","");
-                                                char *escopo = top();
-                                                char *key = cat(escopo, "#", $2,"","");
-                                                printf("Assignment: %s\n", s2);
+assignment : type ID ASSIGN expr {
+        char *s1 = cat($1->type, " ", $2, " ", "=");
+        char *s2 = cat(s1, " ", $4->code, "", "");
+        char *escopo = top();
+        char *key = cat(escopo, "#", $2, "", "");
+        printf("Assignment: %s\n", s2);
 
-                                                hash_table_set(symbols_table, key, $1->type);
+        hash_table_set(symbols_table, key, $1->type);
 
-                                                $$ = createRecord(s2,"");
-                                                free(s1);
-                                                free(s2);
-                                                free($2);
-                                                freeRecord($1);
-                                                freeRecord($4);
+        $$ = createRecord(s2, "");
+        free(s1);
+        free(s2);
+        free($2);
+        freeRecord($1);
+        freeRecord($4);
+    }
+    | type ID ASSIGN function_call {   
+        char *s1 = cat($1->type, " ", $2, " ", "=");
+        char *s2 = cat(s1, " ", $4->code, "", "");
+        char *escopo = top();
+        char *key = cat(escopo, "#", $2, "", "");
+        printf("Assignment: %s\n", s2);
 
-                                            }
-           | type ID ASSIGN function_call   {   
-                                                char *s1 = cat($1->type, " ", $2, " ", "=");
-                                                char *s2 = cat(s1, " ", $4->code,"","");
-                                                char *escopo = top();
-                                                char *key = cat(escopo, "#", $2,"","");
-                                                printf("Assignment: %s\n", s2);
+        hash_table_set(symbols_table, key, $1->type);
 
-                                                hash_table_set(symbols_table, key, $1->type);
+        $$ = createRecord(s2, "");
+        free(s1);
+        free(s2);
+        free($2);
+        freeRecord($1);
+        freeRecord($4);
+    } 
+    | ID ASSIGN expr { printf("Assignment: id = expr\n"); }
+    | list_value ASSIGN expr { printf("Assignment: list_value = expr\n"); }
+    | ID INCREMENT { printf("Assignment: id++\n"); }
+    | ID DECREMENT { printf("Assignment: id--\n"); }
+    | ID ASSIGN function_call {
+        printf("Assignment: function_call");
+    }
+    ;
 
-                                                $$ = createRecord(s2,"");
-                                                free(s1);
-                                                free(s2);
-                                                free($2);
-                                                freeRecord($1);
-                                                freeRecord($4);
+return : RETURN expr {
+        printf("Statement: return %s\n", $2->code);
+        char *s1 = cat("return", " ", $2->code, "", "");
+        $$ = createRecord(s1, "");
+        freeRecord($2);
+        free(s1);
+    }
+    ;
 
-                                            } 
-           | ID ASSIGN expr { printf("Assignment: id = expr\n"); }
-           | list_value ASSIGN expr { printf("Assignment: list_value = expr\n"); }
-           | ID INCREMENT { printf("Assignment: id++\n"); }
-           | ID DECREMENT { printf("Assignment: id--\n"); }
-           | ID ASSIGN function_call        {
-                                                printf("Assignment: function_call");
+expr : term {
+        printf("Expr: %s\n", $1->code);
+        $$ = createRecord($1->code, "");
+        freeRecord($1);
+    }
+    | expr PLUS term { 
+        printf("Expr: %s + %s\n", $1->code, $3->code);
+        char *s1 = cat($1->code, "+", $3->code, "", "");
+        $$ = createRecord(s1, "");
+        free(s1);
+        freeRecord($1);
+        freeRecord($3);
+    }
+    | expr MINUS term {
+        printf("Expr: %s - %s\n", $1->code, $3->code);
+        char *s1 = cat($1->code, "-", $3->code, "", "");
+        $$ = createRecord(s1, "");
+        free(s1);
+        freeRecord($1);
+        freeRecord($3);
+    }
+    | '(' expr ')' {
+        printf("Expr: (%s)\n", $2->code);
+        char *s1 = cat("(", $2->code, ")", "", "");
+        $$ = createRecord(s1, "");
+        free(s1);
+        freeRecord($2);
+    }
+    ;
 
-                                            }
-           ;
+term : var {
+        printf("Term: %s\n", $1);
+        $$ = createRecord($1,"");
+        free($1);
+    }
+    | term TIMES var {
+        printf("Term: %s * %s\n", $1->code, $3);
+        char *s1 = cat($1->code, "*", $3, "","");
+        $$ = createRecord(s1,"");
+        free(s1);
+        freeRecord($1);
+        free($3);
+    }
+    | term DIVIDE var {
+        printf("Term: %s / %s\n", $1->code, $3);
 
-return: RETURN expr                         {
-                                                printf("Statement: return %s\n", $2->code);
-                                                char *s1 = cat("return", " ", $2->code, "", "");
+        char *s1 = cat($1->code, "/", $3,"","");  
 
-                                                $$ = createRecord(s1,"");
-                                                freeRecord($2);
-                                                free(s1);
-                                            }
-
-expr : term                                 {
-                                                printf("Expr: %s\n", $1->code);
-
-                                                $$ = createRecord($1->code, "");
-                                                freeRecord($1);
-                                            }
-     | expr PLUS term                       { 
-                                                printf("Expr: %s + %s\n", $1->code, $3->code);
-
-                                                char *s1 = cat($1->code, "+", $3->code,"","");
-
-                                                $$ = createRecord(s1,"");
-                                                free(s1);
-                                                freeRecord($1);
-                                                freeRecord($3);
-                                            }
-     | expr MINUS term                      {
-                                                printf("Expr: %s - %s\n", $1->code, $3->code);
-
-                                                char *s1 = cat($1->code, "-", $3->code,"","");
-
-                                                $$ = createRecord(s1,"");
-                                                free(s1);
-                                                freeRecord($1);
-                                                freeRecord($3);
-                                            }
-     | '(' expr ')'                         {
-                                                printf("Expr: (%s)\n", $2->code);
-
-                                                char *s1 = cat("(", $2->code, ")","","");
-
-                                                $$ = createRecord(s1,"");
-                                                free(s1);
-                                                freeRecord($2);
-                                            }
-     ;
-
-term : var                                  {
-                                                printf("Term: %s\n", $1);
-
-                                                $$ = createRecord($1,"");
-                                                
-                                                free($1);
-                                            }
-     | term TIMES var                       {
-                                                printf("Term: %s * %s\n", $1->code, $3);
-                                                char *s1 = cat($1->code, "*", $3, "","");
-                                                
-
-                                                $$ = createRecord(s1,"");
-                                                free(s1);
-                                                freeRecord($1);
-                                                free($3);
-                                            }
-     | term DIVIDE var                      {
-                                                printf("Term: %s / %s\n", $1->code, $3);
-
-                                                char *s1 = cat($1->code, "/", $3,"","");  
-
-                                                $$ = createRecord(s1,"");
-                                                free(s1);
-                                                freeRecord($1);
-                                                free($3);
+        $$ = createRecord(s1,"");
+        free(s1);
+        freeRecord($1);
+        free($3);
                                             
-                                            }
-     ;
+    }
+    ;
 
-var : INTEGER                               {
-                                                printf("Var: %s\n", $1);
-                                                
-                                                $$ = $1;
-    
-                                               
-                                            }
-    | REAL                                  {
-                                                printf("Var: %s\n", $1);
-
-                                                $$ = $1;
-    
-                                                
-                                            }
-    | ID                                    {
-                                                printf("Var: %s\n", $1);
-                                                
-                                                $$ = $1;
-    
-                                                
-                                            }
-    | LIT_STRING                            {
-                                                printf("Var: %s\n", $1);
-
-                                                $$ = $1;
-                                                free($1);
-                                            }
-    | list_value { printf("Var: %s\n", $1->code);  }
+var : INTEGER {
+        printf("Var: %s\n", $1);
+        $$ = $1;
+    }
+    | REAL {
+        printf("Var: %s\n", $1);
+        $$ = $1;        
+    }
+    | ID {
+        printf("Var: %s\n", $1);
+        $$ = $1;
+    }
+    | LIT_STRING {
+        printf("Var: %s\n", $1);
+        $$ = $1;
+        free($1);
+    }
+    | list_value { 
+        printf("Var: %s\n", $1->code);
+    }
     ;
 
 var_list : var { printf("Var_list: var\n"); }
@@ -335,17 +299,17 @@ var_list : var { printf("Var_list: var\n"); }
          | { printf("Var_list: empty\n"); }
          ;
 
-type : P_TYPE                           {
-                                            printf("Type: %s\n", $1); 
-                                            $$ = createRecord($1, $1);
-                                            free($1);
-                                        }
-     | list                             {
-                                            printf("Type: list\n");
-                                            $$ = createRecord($1->code, "");
-                                            freeRecord($1);
-                                        }
-     ;
+type : P_TYPE {
+        printf("Type: %s\n", $1); 
+        $$ = createRecord($1, $1);
+        free($1);
+    }
+    | list {
+        printf("Type: list\n");
+        $$ = createRecord($1->code, "");
+        freeRecord($1);
+    }
+    ;
 
 list : P_TYPE LESS type GREATER { printf("List: P_TYPE < type >\n"); }
      ;
@@ -358,74 +322,73 @@ index : ID { printf("Index: ID\n"); }
       | INTEGER { printf("Index: INTEGER\n"); }
       ;
 
-function_call : ID '(' paramslist ')'                   {
-                                                            printf("Function_call: %s(%s)\n", $1, $3->code);
-                                                            char *s1 = cat($1, "(", $3->code, ")", "");
-                                                            $$ = createRecord(s1, "");
-                                                            freeRecord($3);
-                                                            free($1);
-                                                            free(s1);
-                                                        }
+function_call : ID '(' paramslist ')' {
+        printf("Function_call: %s(%s)\n", $1, $3->code);
+        char *s1 = cat($1, "(", $3->code, ")", "");
+        $$ = createRecord(s1, "");
+        freeRecord($3);
+        free($1);
+        free(s1);
+    }
               ;
-print_command:  PRINT '(' var_list ')'                   {
-                                                            printf("Print: %s\n", $3->code);
+print_command:  PRINT '(' var_list ')' {
+        printf("Print: %s\n", $3->code);
+        $$ = createRecord("printf(\"%s\",$3 -> code)","");
+        freeRecord($3);
+    }
+    |PRINT '('concat_string ')' {
+        printf("Print: %s\n", $3->code);
+        char *s1 = cat("printf(",$3->code, "",")","");
+        $$ = createRecord(s1,"");
+        freeRecord($3);
+        free(s1);
+    }
+    ;
+concat_string: LIT_STRING PLUS var {
+        printf("concat_string: %s + %s\n", $1, $3);
+        int lenStr = strlen($1);
+        
+        $1[lenStr-1] = '\0';
 
-                                                            $$ = createRecord("printf(\"%s\",$3 -> code)","");
-                                                            freeRecord($3);
-                                                        }
-            |PRINT '('concat_string ')'              {
-                                                            printf("Print: %s\n", $3->code);
-                                                            char *s1 = cat("printf(",$3->code, "",")","");
-                                                            $$ = createRecord(s1,"");
-                                                            freeRecord($3);
-                                                            free(s1);
-                                                        }
-            ;
-concat_string: LIT_STRING PLUS var                      {
-                                                            printf("concat_string: %s + %s\n", $1, $3);
-                                                            int lenStr = strlen($1);
-                                                            
-                                                            $1[lenStr-1] = '\0';
+        char *s1 = cat($1, "%s\\n", "\"", ",",$3);
+        $$ = createRecord(s1, "");
+        free(s1);
+        free($3);
+        free($1);
+    }
+    ;
+params : type ID {
+        printf("Params: %s %s\n", $1->code, $2); 
+        char *s1 = cat($1->code, " ", $2, "", "");
+        char *key = cat(top(), "#", $2, "", "");
 
-                                                            char *s1 = cat($1, "%s\\n", "\"", ",",$3);
-                                                            $$ = createRecord(s1, "");
-                                                            free(s1);
-                                                            free($3);
-                                                            free($1);
-                                                        }
-            ;
-params : type ID                                        {
-                                                            printf("Params: %s %s\n", $1->code, $2); 
-                                                            char *s1 = cat($1->code, " ", $2, "", "");
-                                                            char *key = cat(top(), "#", $2, "", "");
-
-                                                            hash_table_set(symbols_table, key, $1->type);
-                                                            $$ = createRecord(s1, "");
-                                                            free(key);
-                                                            free(s1);
-                                                            free($2);
-                                                            freeRecord($1);   
-                                                        }
-       | expr                                           { 
-                                                            printf("Params: expr\n");
-                                                            $$ = createRecord($1 -> code, "");
-                                                            freeRecord($1);
-                                                        }
-       | { printf("Params: empty\n"); $$ = createRecord("", "");};
+        hash_table_set(symbols_table, key, $1->type);
+        $$ = createRecord(s1, "");
+        free(key);
+        free(s1);
+        free($2);
+        freeRecord($1);   
+    }
+    | expr { 
+        printf("Params: expr\n");
+        $$ = createRecord($1 -> code, "");
+        freeRecord($1);
+    }
+    | { printf("Params: empty\n"); $$ = createRecord("", "");};
        ;
 
-paramslist : params                                             { printf("Params list: single\n"); 
-                                                                    $$ = createRecord($1 -> code, "");
-                                                                    freeRecord($1); 
-                                                                    }
-           | params ',' paramslist                              { printf("Params list: multiple\n"); 
-                                                                    char *s1 = cat($1->code, ",", $3->code, "","");
-                                                                    freeRecord($1);
-                                                                    freeRecord($3);
-                                                                    $$ = createRecord(s1, "");
-                                                                    free(s1);
-                                                                }
-           ;
+paramslist : params { printf("Params list: single\n"); 
+        $$ = createRecord($1 -> code, "");
+        freeRecord($1); 
+    }
+    | params ',' paramslist { printf("Params list: multiple\n"); 
+        char *s1 = cat($1->code, ",", $3->code, "","");
+        freeRecord($1);
+        freeRecord($3);
+        $$ = createRecord(s1, "");
+        free(s1);
+    }
+    ;
 
 condition : expr comparison expr {
     printf("Condition: expr comparison expr\n"); 
