@@ -172,9 +172,7 @@ assignment : type ID ASSIGN expr {
         char *escopo = top();
         char *key = cat(escopo, "#", $2, "", "");
         printf("Assignment: %s\n", s2);
-
         hash_table_set(symbols_table, key, $1->type);
-
         $$ = createRecord(s2, "");
         free(s1);
         free(s2);
@@ -188,9 +186,7 @@ assignment : type ID ASSIGN expr {
         char *escopo = top();
         char *key = cat(escopo, "#", $2, "", "");
         printf("Assignment: %s\n", s2);
-
         hash_table_set(symbols_table, key, $1->type);
-
         $$ = createRecord(s2, "");
         free(s1);
         free(s2);
@@ -261,14 +257,11 @@ term : var {
     }
     | term DIVIDE var {
         printf("Term: %s / %s\n", $1->code, $3);
-
         char *s1 = cat($1->code, "/", $3,"","");  
-
         $$ = createRecord(s1,"");
         free(s1);
         freeRecord($1);
         free($3);
-                                            
     }
     ;
 
@@ -294,10 +287,24 @@ var : INTEGER {
     }
     ;
 
-var_list : var { printf("Var_list: var\n"); }
-         | var_list ',' var { printf("Var_list , Var\n"); }
-         | { printf("Var_list: empty\n"); }
-         ;
+var_list : var { 
+        printf("Var_list: %s\n", $1);
+        $$ = createRecord($1, "");
+        free($1);
+
+    }
+    | var_list ',' var { 
+        printf("Var_list , %s\n", $1->code; 
+        char *s1 = cat($1->code, ",", $3, "", "");
+        $$ = createRecord(s1, "");
+        freeRecord($1);
+        freeRecord($3);
+        free(s1);
+    }
+    | {
+        printf("Var_list: empty\n"); 
+    }
+    ;
 
 type : P_TYPE {
         printf("Type: %s\n", $1); 
@@ -311,16 +318,42 @@ type : P_TYPE {
     }
     ;
 
-list : P_TYPE LESS type GREATER { printf("List: P_TYPE < type >\n"); }
-     ;
+list : P_TYPE LESS type GREATER {
+        printf("List: %s < %s >\n", $1->code, $3->code);
+        char *s1 = cat($1->code, "<", $3->code, "","");
+        $$ = createRecord(s1, "");
+        free(s1);
+        freeRecord($1);
+        freeRecord($3);
+    }
+    ;
 
-list_value : ID '[' index ']' { printf("List_value: ID[index]\n");  }
-           | '[' var_list ']' { printf("List_value: Var_list\n"); }
-           ;
+list_value : ID '[' index ']' { 
+        printf("List_value: %s[%s]\n");
+        char *s1 = cat($1, "[", $3, "]", "");
+        $$ = createRecord(s1, "");
+        freeRecord($3);
+        free($1);
+        free(s1);
+    }
+    | '[' var_list ']' { 
+        printf("List_value: %s\n");
+        char *s1 = cat("[", $2->code, "]", "", "");
+        $$ = createRecord(s1, "");
+        freeRecord($2);
+        free(s1);
+    }
+    ;
 
-index : ID { printf("Index: ID\n"); }
-      | INTEGER { printf("Index: INTEGER\n"); }
-      ;
+index : ID {
+        printf("Index: %s\n");
+        $$ = $1;
+    }
+    | INTEGER { 
+        printf("Index: INTEGER\n"); 
+        $$ = $1;
+    }
+    ;
 
 function_call : ID '(' paramslist ')' {
         printf("Function_call: %s(%s)\n", $1, $3->code);
