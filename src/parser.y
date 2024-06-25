@@ -444,9 +444,21 @@ condition : expr comparison expr {
 }
 ;
 
-condition_list : condition { printf("Condition_list: condition\n"); }
-               | condition_list comparison condition { printf("Condition_list: condition_list comparison condition\n"); }
-               ;
+condition_list : condition { 
+    printf("Condition_list: condition\n"); 
+    $$ = $1;
+
+}
+| condition_list comparison condition {
+    printf("Condition_list: condition_list comparison condition\n"); 
+    char *s1 = cat($1->code, $2->code, $3->code, "", "");
+    $$ = createRecord(s1, "");
+    free(s1);
+    freeRecord($1);
+    freeRecord($2);
+    freeRecord($3);
+}
+;
 
 comparison : EQUAL { 
     printf("Comparison: ==\n"); 
