@@ -553,8 +553,8 @@ int main(int argc, char ** argv) {
     int codigo;
 
     if (argc != 3) {
-       printf("Usage: $./compiler input.txt output.txt\nClosing application...\n");
-       exit(0);
+        printf("Usage: $./compiler input.txt output.txt\nClosing application...\n");
+        exit(0);
     }
     
     yyin = fopen(argv[1], "r");
