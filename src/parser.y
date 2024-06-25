@@ -332,7 +332,6 @@ list_value : ID '[' index ']' {
         printf("List_value: %s[%s]\n");
         char *s1 = cat($1, "[", $3, "]", "");
         $$ = createRecord(s1, "");
-        freeRecord($3);
         free($1);
         free(s1);
     }
@@ -347,11 +346,11 @@ list_value : ID '[' index ']' {
 
 index : ID {
         printf("Index: %s\n");
-        $$ = $1;
+        $$ = createRecord($1, "");
     }
     | INTEGER { 
         printf("Index: INTEGER\n"); 
-        $$ = $1;
+        $$ = createRecord($1, "");
     }
     ;
 
@@ -450,7 +449,6 @@ condition_list : condition {
     char *s1 = cat($1->code, $2->code, $3->code, "", "");
     $$ = createRecord(s1, "");
     free(s1);
-    freeRecord($1);
     freeRecord($2);
     freeRecord($3);
 }
@@ -497,7 +495,6 @@ if_statement : IF '(' condition_list ')' '{' stmlist '}' {
     $$ = createRecord(s2, "");
     free(s1);
     free(s2);
-    freeRecord($1);
     freeRecord($3);
     freeRecord($6);
 }
@@ -510,7 +507,6 @@ if_statement : IF '(' condition_list ')' '{' stmlist '}' {
     free(s1);
     free(s2);
     free(s3);
-    freeRecord($1);
     freeRecord($3);
     freeRecord($6);
     freeRecord($8);
@@ -527,7 +523,6 @@ else_if_statements : ELIF '(' condition_list ')' '{' stmlist '}' else_if_stateme
     free(s1);
     free(s2);
     free(s3);
-    freeRecord($1);
     freeRecord($3);
     freeRecord($6);
     freeRecord($8);
@@ -549,17 +544,15 @@ while_statement : WHILE '(' condition_list ')' '{' stmlist '}' {
 }
 ;
 
-for_statement : FOR '(' assignment ';' condition ';' assignment ';' ')' '{' %stmlist '}' {
+for_statement : FOR '(' assignment ';' condition ';' assignment ';' ')' '{' stmlist '}' {
     printf("For statement: for ( %s ; %s ; %s ; ) { %s }\n", $3->code, $5->code, $7->code, $10->code); 
     char *s1 = cat($1->code, "(", $3->code, ";", $5->code);
     char *s2 = cat(";", $7->code, "; ) {", $10->code, "}");
     char *s3 = cat(s1, s2, "", "");
-
     $$ = createRecord(s3, "");
     free(s1);
     free(s2);
     free(s3);
-    freeRecord($1);
     freeRecord($3);
     freeRecord($5);
     freeRecord($7);
@@ -585,6 +578,15 @@ for_statement : FOR '(' assignment ';' condition ';' assignment ';' ')' '{' %stm
 int main(int argc, char ** argv) {
     int codigo;
 
+    if (argc > 1) {
+        FILE *file = fopen(argv[1], "r");
+        if (!file) {
+            printf("Could not open file %s\n", argv[1]);
+            return 1;
+        }
+        yyin = file;
+    }
+
     if (argc != 3) {
         printf("Usage: $./compiler input.txt output.txt\nClosing application...\n");
         exit(0);
@@ -607,20 +609,18 @@ int main(int argc, char ** argv) {
 }
 
 int yyerror(char *msg) {
-    fprintf(stderr, "%d: %s at '%s'\n", yylineno, msg, yytext);
+    // fprintf(stderr, "%s at '%s'\n", yylineno, msg, yytext);
+    fptintf(stderr, "%s at line %d before '%s'\n", msg, yylineno, yytext);
     return 0;
 }
 
-char * cat(char * s1, char * s2, char * s3, char * s4, char * s5) {
-    int tam;
-    char * output;
+char *cat(const char *s1, const char *s2, const char *s3, const char *s4, const char *s5) {
+    size_t len = strlen(s1) + strlen(s2) + strlen(s3) + strlen(s4) + strlen(s5) + 1;
+    char output = (char *) malloc(sizeof(char) *len);
     
-    tam = strlen(s1) + strlen(s2) + strlen(s3) + strlen(s4) + strlen(s5)+ 1;
-    output = (char *) malloc(sizeof(char) * tam);
-    
-    if (!output) {
-        printf("Allocation problem. Closing application...\n");
-        exit(0);
+    if (output == NULL) {
+        perror("Failed to allocate memory for concatenation. Closing application...\n");
+        exit(EXIT_FAILURE);
     }
     
     sprintf(output, "%s%s%s%s%s", s1, s2, s3, s4, s5);
