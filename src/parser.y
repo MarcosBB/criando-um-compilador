@@ -330,7 +330,7 @@ function_call : ID '(' paramslist ')' {
         free($1);
         free(s1);
     }
-              ;
+    ;
 print_command:  PRINT '(' var_list ')' {
         printf("Print: %s\n", $3->code);
         $$ = createRecord("printf(\"%s\",$3 -> code)","");
@@ -375,7 +375,7 @@ params : type ID {
         freeRecord($1);
     }
     | { printf("Params: empty\n"); $$ = createRecord("", "");};
-       ;
+    ;
 
 paramslist : params { printf("Params list: single\n"); 
         $$ = createRecord($1 -> code, "");
@@ -577,19 +577,20 @@ int yyerror(char *msg) {
     fprintf(stderr, "%d: %s at '%s'\n", yylineno, msg, yytext);
     return 0;
 }
-char * cat(char * s1, char * s2, char * s3, char * s4, char * s5){
-  int tam;
-  char * output;
 
-  tam = strlen(s1) + strlen(s2) + strlen(s3) + strlen(s4) + strlen(s5)+ 1;
-  output = (char *) malloc(sizeof(char) * tam);
-  
-  if (!output){
-    printf("Allocation problem. Closing application...\n");
-    exit(0);
-  }
-  
-  sprintf(output, "%s%s%s%s%s", s1, s2, s3, s4, s5);
-  
-  return output;
+char * cat(char * s1, char * s2, char * s3, char * s4, char * s5) {
+    int tam;
+    char * output;
+    
+    tam = strlen(s1) + strlen(s2) + strlen(s3) + strlen(s4) + strlen(s5)+ 1;
+    output = (char *) malloc(sizeof(char) * tam);
+    
+    if (!output) {
+        printf("Allocation problem. Closing application...\n");
+        exit(0);
+    }
+    
+    sprintf(output, "%s%s%s%s%s", s1, s2, s3, s4, s5);
+    
+    return output;
 }
