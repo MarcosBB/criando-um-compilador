@@ -9,6 +9,7 @@ int yylex(void);
 int yyerror(char *s);
 extern int yylineno;
 extern char *yytext;
+extern FILE * yyin, * yyout;
 
 char * cat(char *, char *, char *, char *, char *);
 
@@ -31,11 +32,11 @@ struct node *escopo_stack;
 %token <sValue> LIT_STRING P_TYPE 
 
 %token WHILE FOR IF ELSE ELIF SEMI FUNCTION ASSIGN EQUAL RETURN AND OR NOT NOT_EQUAL INCREMENT DECREMENT IN PLUS MINUS TIMES DIVIDE LESS_EQUAL GREATER_EQUAL LESS GREATER
+%token PRINT MAIN
 
-
-%type <rec> prog stmlist stm variable_decl assignment type list function_call params paramslist condition comparison if_statement while_statement for_statement subprog return
+%type <rec> prog stmlist print_command concat_string main stm variable_decl assignment type list function_call params paramslist condition comparison if_statement while_statement for_statement subprog return
 %type <rec> expr term var_list list_value subprogs_list
-%type <sValue> var
+%type <sValue> var 
 
 %left OR
 %left AND
@@ -47,16 +48,28 @@ struct node *escopo_stack;
 %start prog
 %%
 
-prog : subprogs_list                        {
-                                                printf("Program\n");
-                                                printf("C code\n");
-                                                printf("%s\n", $1 -> code);
+prog : subprogs_list main                   {
+                                                
+                                                printf("%s %s\n", $1 -> code, $2 -> code);
+                                                char *s = cat($1 -> code, "\n",  $2 -> code, "", "");
+                                                fprintf(yyout, "%s", s);
+
+                                                free(s);
                                                 freeRecord($1);
+                                                freeRecord($2);
                                                 free(escopo_stack);
                                                 free(symbols_table);
                                                 free(abstractions_table);
                                             }
      ;
+
+main : FUNCTION type MAIN '(' ')''{'stmlist '}'           {
+                                                                        char * s = cat("int main(){\n", $7->code, "}", "", "");
+                                                                        freeRecord($7);
+                                                                        $$ = createRecord(s, "");
+                                                                        free(s);
+                                                                    }
+          ;
 
 subprogs_list : subprog                     {
                                                 printf("Subprog_list: subprog\n");
@@ -106,7 +119,7 @@ stm : assignment SEMI {
     | for_statement { printf("Statement: for_statement\n"); }
     | return SEMI                      {
                                                 printf("Statement: return %s\n", $1->code);
-                                                char *s1 = cat($1->code, ";\n" , "","", "");
+                                                char *s1 = cat("\t", $1->code, ";\n" , "","");
 
                                                 $$ = createRecord(s1,"");
                                                 freeRecord($1);
@@ -123,6 +136,16 @@ stm : assignment SEMI {
                                                 printf("Statement: variable_decl = %s\n", $1 -> code);
 
                                                 char *s1 = cat($1->code, ";\n","","","");
+                                                printf("%s\n", ";");
+                                                printf("%s\n", s1);
+                                                $$ = createRecord(s1, "");
+                                                free(s1);
+                                                freeRecord($1);
+                                            }
+    | print_command SEMI                    {
+                                                printf("Statement: print_command = %s\n", $1 -> code);
+
+                                                char *s1 = cat("\t", $1->code, ";\n","","");
                                                 printf("%s\n", ";");
                                                 printf("%s\n", s1);
                                                 $$ = createRecord(s1, "");
@@ -161,7 +184,7 @@ variable_decl: type ID                                  {printf("Variable Declar
             ;
 
 assignment : type ID ASSIGN expr            {
-                                                char *s1 = cat($1->type, " ", $2, " ", "<<");
+                                                char *s1 = cat($1->type, " ", $2, " ", "=");
                                                 char *s2 = cat(s1, " ", $4->code,"","");
                                                 char *escopo = top();
                                                 char *key = cat(escopo, "#", $2,"","");
@@ -178,7 +201,7 @@ assignment : type ID ASSIGN expr            {
 
                                             }
            | type ID ASSIGN function_call   {   
-                                                char *s1 = cat($1->type, " ", $2, " ", "<<");
+                                                char *s1 = cat($1->type, " ", $2, " ", "=");
                                                 char *s2 = cat(s1, " ", $4->code,"","");
                                                 char *escopo = top();
                                                 char *key = cat(escopo, "#", $2,"","");
@@ -194,8 +217,8 @@ assignment : type ID ASSIGN expr            {
                                                 freeRecord($4);
 
                                             } 
-           | ID ASSIGN expr { printf("Assignment: id << expr\n"); }
-           | list_value ASSIGN expr { printf("Assignment: list_value << expr\n"); }
+           | ID ASSIGN expr { printf("Assignment: id = expr\n"); }
+           | list_value ASSIGN expr { printf("Assignment: list_value = expr\n"); }
            | ID INCREMENT { printf("Assignment: id++\n"); }
            | ID DECREMENT { printf("Assignment: id--\n"); }
            | ID ASSIGN function_call        {
@@ -301,7 +324,12 @@ var : INTEGER                               {
     
                                                 
                                             }
-    | LIT_STRING { printf("Var: %s\n", $1); }
+    | LIT_STRING                            {
+                                                printf("Var: %s\n", $1);
+
+                                                $$ = $1;
+                                                free($1);
+                                            }
     | list_value { printf("Var: %s\n", $1->code);  }
     ;
 
@@ -342,7 +370,33 @@ function_call : ID '(' paramslist ')'                   {
                                                             free(s1);
                                                         }
               ;
+print_command:  PRINT '(' var_list ')'                   {
+                                                            printf("Print: %s\n", $3->code);
 
+                                                            $$ = createRecord("printf(\"%s\",$3 -> code)","");
+                                                            freeRecord($3);
+                                                        }
+            |PRINT '('concat_string ')'              {
+                                                            printf("Print: %s\n", $3->code);
+                                                            char *s1 = cat("printf(",$3->code, "",")","");
+                                                            $$ = createRecord(s1,"");
+                                                            freeRecord($3);
+                                                            free(s1);
+                                                        }
+            ;
+concat_string: LIT_STRING PLUS var                      {
+                                                            printf("concat_string: %s + %s\n", $1, $3);
+                                                            int lenStr = strlen($1);
+                                                            
+                                                            $1[lenStr-1] = '\0';
+
+                                                            char *s1 = cat($1, "%s\\n", "\"", ",",$3);
+                                                            $$ = createRecord(s1, "");
+                                                            free(s1);
+                                                            free($3);
+                                                            free($1);
+                                                        }
+            ;
 params : type ID                                        {
                                                             printf("Params: %s %s\n", $1->code, $2); 
                                                             char *s1 = cat($1->code, " ", $2, "", "");
@@ -495,14 +549,28 @@ for_statement : FOR '(' assignment ';' condition ';' assignment ')' '{' stmlist 
 
 %%
 
-int main(void) {
+int main(int argc, char ** argv) {
+    int codigo;
+
+    if (argc != 3) {
+       printf("Usage: $./compiler input.txt output.txt\nClosing application...\n");
+       exit(0);
+    }
+    
+    yyin = fopen(argv[1], "r");
+    yyout = fopen(argv[2], "w");
     symbols_table = hash_table_create();
     abstractions_table = hash_table_create();
     escopo_stack = malloc(sizeof(struct node));
     insert_at_head("main");
     char *a_symbol = cat(top(), "#","A","","");
     hash_table_set(symbols_table,a_symbol, "float");
-    return yyparse();
+    codigo = yyparse();
+
+    fclose(yyin);
+    fclose(yyout);
+
+	return codigo;
 }
 
 int yyerror(char *msg) {

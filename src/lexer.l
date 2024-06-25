@@ -13,6 +13,7 @@ extern int yylineno = 0;
 [0-9]+                                  { yylval.sValue = strdup(yytext); return INTEGER; }
 [0-9]+"."[0-9]*|[0-9]*"."[0-9]+         { yylval.sValue = strdup(yytext); return REAL; }
 \"[^\"]*\"                              { yylval.sValue = strdup(yytext); return LIT_STRING; }
+"main"                                  {return MAIN;}
 "while"                                 { return WHILE; }
 "for"                                   { return FOR; }
 "in"                                    { return IN; }
@@ -27,6 +28,7 @@ extern int yylineno = 0;
 "if"                                    { return IF; }
 "else"                                  { return ELSE; }
 "elif"                                  { return ELIF; }
+"print"                                 { return PRINT;}
 "("                                     { return yytext[0]; }
 ")"                                     { return yytext[0]; }
 "{"                                     { return yytext[0]; }
