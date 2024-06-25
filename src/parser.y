@@ -170,18 +170,15 @@ stmlist : stm                                   {
                                                 }
         ;
 
-variable_decl: type ID                                  {printf("Variable Declaration: %s \n", $2);
-                                                            char *escopo = top();
-                                                            char *key = cat(escopo, "#", $2, "", "");
-                                                            
-                                                            
-                                                           
-                                                            hash_table_set(symbols_table, key, $1 -> type);
-                                                            char* s1 = cat($1 -> code, " ", $2, "","");
-                                                            $$ = createRecord(s1, "");
-                                                       
-                                                            }
-            ;
+variable_decl: type ID {
+        printf("Variable Declaration: %s \n", $2);
+        char *escopo = top();
+        char *key = cat(escopo, "#", $2, "", "");
+        hash_table_set(symbols_table, key, $1 -> type);
+        char* s1 = cat($1 -> code, " ", $2, "","");
+        $$ = createRecord(s1, "");
+    }
+    ;
 
 assignment : type ID ASSIGN expr            {
                                                 char *s1 = cat($1->type, " ", $2, " ", "=");
@@ -487,7 +484,7 @@ comparison : EQUAL {
 
 if_statement : IF '(' condition_list ')' '{' stmlist '}' { 
     printf("If statement: if ( %s ) { %s }\n", $3->code, $6->code);
-    char *s1 = cat($1, "(", $3->code, ") {\n", $6->code);
+    char *s1 = cat($1->code, "(", $3->code, ") {\n", $6->code);
     char *s2 = cat(s1, "}\n", "", "", "");
     $$ = createRecord(s2, "");
     free(s1);
@@ -498,7 +495,7 @@ if_statement : IF '(' condition_list ')' '{' stmlist '}' {
 }
 | IF '(' condition_list ')' '{' stmlist '}' else_if_statements ELSE  '{' stmlist '}' { 
     printf("If statement: if (%s) { %s } %s else { %s }\n", $3->code, $6->code, $8->code, $11->code); 
-    char *s1 = cat($1, "(", $3->code, ") {\n", $6->code);
+    char *s1 = cat($1->code, "(", $3->code, ") {\n", $6->code);
     char *s2 = cat("}\n", $8->code, "else {\n", $11->code, "}\n");
     char *s3 = cat(s1, s2 , "", "", "");
     $$ = createRecord(s3, "");
@@ -515,7 +512,7 @@ if_statement : IF '(' condition_list ')' '{' stmlist '}' {
 
 else_if_statements : ELIF '(' condition_list ')' '{' stmlist '}' else_if_statements {
     printf("Else if statement: elif ( %s ) { %s }\n", $3->code, $6->code, $8->code); 
-    char *s1 = cat($1, "(", $3->code, ") {\n", $6->code);
+    char *s1 = cat($1->code, "(", $3->code, ") {\n", $6->code);
     char *s2 = cat("}\n", $8->code, "", "", "");
     char *s3 = cat(s1, s2, "", "", "");
     $$ = createRecord(s3, "");
@@ -533,19 +530,47 @@ else_if_statements : ELIF '(' condition_list ')' '{' stmlist '}' else_if_stateme
 ;
 
 while_statement : WHILE '(' condition_list ')' '{' stmlist '}' {
-                    printf("While statement: while ( %s ) { %s }\n", $3->code, $6->code);
-                    char *s1 = cat($1, "(", $3->code, ") {\n", $6->code);
-                    char *s2 = cat"}\n");
-                    $$ = createRecord(s1, "");
-                    free(s1);
-                    freeRecord($3);
-                    freeRecord($6);
-                }
-                ;
+    printf("While statement: while ( %s ) { %s }\n", $3->code, $6->code);
+    char *s1 = cat($1, "(", $3->code, ") {\n", $6->code, "}\n");
+    char *s2 = cat(s1, "");
+    $$ = createRecord(s1, "");
+    free(s1);
+    free(s2)
+    freeRecord($3);
+    freeRecord($6);
+}
+;
 
-for_statement : FOR '(' assignment ';' condition ';' assignment ')' '{' stmlist '}' { printf("For statement: for ( assignment ; condition ; assignment ) { stmlist }\n"); }
-              | FOR '(' P_TYPE ID IN ID ')' '{' stmlist '}' { printf("For statement: for ( type id in id ) { stmlist }\n"); }
-              ;
+for_statement : FOR '(' assignment ';' condition ';' assignment ';' ')' '{' %stmlist '}' {
+    printf("For statement: for ( %s ; %s ; %s ; ) { %s }\n", $3->code, $5->code, $7->code, $10->code); 
+    char *s1 = cat($1->code, "(", $3->code, ";", $5->code);
+    char *s2 = cat(";", $7->code, "; ) {", $10->code, "}");
+    char *s3 = cat(s1, s2, "", "");
+
+    $$ = createRecord(s3, "");
+    free(s1);
+    free(s2);
+    free(s3);
+    freeRecord($1);
+    freeRecord($3);
+    freeRecord($5);
+    freeRecord($7);
+    freeRecord($10);
+}
+| FOR '(' P_TYPE ID IN ID ')' '{' stmlist '}' { 
+    printf("For statement: for ( %s %s in %s ) { %s }\n", $3->code, $4->code, $6->code, $9->code); 
+    char *s1 = cat($1->code, "(", $3->code, $4->code, "in");
+    char *s2 = cat($6->code, ")", "{", $9->code, "}");
+    char *s3 = cat(s1, s2, "", "", "");
+    $$ = createRecord(s3, "");
+    free(s1);
+    free(s2);
+    freeRecord($3);
+    freeRecord($4);
+    freeRecord($6);
+    freeRecord($9);
+}
+;
 
 %%
 
