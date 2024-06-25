@@ -3,25 +3,27 @@
 #include <stdlib.h>
 #include <string.h>
 
-void freeRecord(record * r){
-  if (r) {
-    if (r->code != NULL) free(r->code);
-	  if (r->type != NULL) free(r->type);
-    free(r);
+void freeRecord(record *rec)
+{
+  if (rec)
+  {
+    free(rec->code);
+    free(rec->type);
+    free(rec);
   }
 }
 
-record * createRecord(char * c1, char * c2){
-  record * r = (record *) malloc(sizeof(record));
-
-  if (!r) {
-    printf("Allocation problem. Closing application...\n");
-    exit(0);
+record *createRecord(char *code, char *type)
+{
+  record *rec = (record *)malloc(sizeof(record));
+  if (rec == NULL)
+  {
+    printf("Failed to allocate memory for record.\nClosing application...\n");
+    exit(EXIT_FAILURE);
   }
 
-  r->code = strdup(c1);
-  r->type = strdup(c2);
+  rec->code = strdup(code);
+  rec->type = strdup(type);
 
-  return r;
+  return rec;
 }
-
