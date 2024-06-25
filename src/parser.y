@@ -271,7 +271,7 @@ var : INTEGER {
     }
     | REAL {
         printf("Var: %s\n", $1);
-        $$ = $1;        
+        $$ = $1;
     }
     | ID {
         printf("Var: %s\n", $1);
@@ -280,26 +280,27 @@ var : INTEGER {
     | LIT_STRING {
         printf("Var: %s\n", $1);
         $$ = $1;
-        free($1);
     }
     | list_value { 
         printf("Var: %s\n", $1->code);
+        $$ = $1->code;
+        freeRecord($1);
     }
     ;
 
 var_list : var { 
         printf("Var_list: %s\n", $1);
-        // $$ = createRecord($1, "");
-        // free($1);
+        $$ = createRecord($1, "");
+        free($1);
 
     }
     | var_list ',' var { 
         printf("Var_list , %s\n", $1->code); 
-        // char *s1 = cat($1->code, ",", $3, "", "");
-        // $$ = createRecord(s1, "");
-        // freeRecord($1);
-        // freeRecord($3);
-        // free(s1);
+        char *s1 = cat($1->code, ",", $3, "", "");
+        $$ = createRecord(s1, "");
+        freeRecord($1);
+        free($3);
+        free(s1);
     }
     | {
         printf("Var_list: empty\n"); 
@@ -465,35 +466,35 @@ condition_list
 comparison
     : EQUAL {
         printf("Comparison: ==\n");
-        $$ = "==";
+        $$ = createRecord("==", "");
     }
     | NOT_EQUAL {
         printf("Comparison: !=\n");
-        $$ = "!=";
+        $$ = createRecord("!=", "");
     }
     | LESS {
         printf("Comparison: <\n");
-        $$ = "<";
+        $$ = createRecord("<", "");
     }
     | GREATER {
         printf("Comparison: >\n");
-        $$ = ">";
+        $$ = createRecord(">", "");
     }
     | LESS_EQUAL {
         printf("Comparison: <=\n");
-        $$ = "<=";
+        $$ = createRecord("<=", "");
     }
     | GREATER_EQUAL {
         printf("Comparison: >=\n");
-        $$ = ">=";
+        $$ = createRecord(">=", "");
     }
     | AND {
         printf("Comparison: &&\n");
-        $$ = "&&";
+        $$ = createRecord("&&", "");
     }
     | OR {
         printf("Comparison: ||\n");
-        $$ = "||";
+        $$ = createRecord("||", "");
     }
 ;
 
