@@ -1,3 +1,4 @@
+
 %{
 #include <stdio.h>
 #include <stdlib.h>
@@ -20,7 +21,7 @@ struct node *escopo_stack;
 
 %union {
     struct record * rec;
-    char  *sValue; /* string value */
+    char  *sValue;
 }
 
 %token <sValue> ID
@@ -33,7 +34,7 @@ struct node *escopo_stack;
 
 %type <rec> prog stmlist print_command concat_string main stm variable_decl assignment type list function_call params paramslist condition comparison if_statement while_statement for_statement subprog return
 %type <rec> expr term var_list list_value subprogs_list
-%type <sValue> var 
+%type <sValue> var index condition_list
 
 %left OR
 %left AND
@@ -233,397 +234,327 @@ expr : term {
         freeRecord($1);
         freeRecord($3);
     }
-    | '(' expr ')' {
-        printf("Expr: (%s)\n", $2->code);
-        char *s1 = cat("(", $2->code, ")", "", "");
-        $$ = createRecord(s1, "");
-        free(s1);
-        freeRecord($2);
-    }
+    | expr TIMES term { printf("Expr: %s * %s\n", $1->code, $3->code); }
+    | expr DIVIDE term { printf("Expr: %s / %s\n", $1->code, $3->code); }
     ;
 
-term : var {
+term : ID {
+        char *escopo = top();
+        char *key = cat(escopo, "#", $1, "", "");
+        struct record *value = hash_table_get(symbols_table, key);
         printf("Term: %s\n", $1);
-        $$ = createRecord($1,"");
+        $$ = createRecord($1, value->type);
         free($1);
     }
-    | term TIMES var {
-        printf("Term: %s * %s\n", $1->code, $3);
-        char *s1 = cat($1->code, "*", $3, "","");
-        $$ = createRecord(s1,"");
-        free(s1);
-        freeRecord($1);
-        free($3);
-    }
-    | term DIVIDE var {
-        printf("Term: %s / %s\n", $1->code, $3);
-        char *s1 = cat($1->code, "/", $3,"","");  
-        $$ = createRecord(s1,"");
-        free(s1);
-        freeRecord($1);
-        free($3);
-    }
-    ;
-
-var : INTEGER {
-        printf("Var: %s\n", $1);
-        $$ = $1;
+    | INTEGER {
+        printf("Term: %s\n", $1);
+        $$ = createRecord($1, "int");
     }
     | REAL {
-        printf("Var: %s\n", $1);
-        $$ = $1;        
-    }
-    | ID {
-        printf("Var: %s\n", $1);
-        $$ = $1;
+        printf("Term: %s\n", $1);
+        $$ = createRecord($1, "real");
     }
     | LIT_STRING {
-        printf("Var: %s\n", $1);
-        $$ = $1;
-        free($1);
+        printf("Term: %s\n", $1);
+        $$ = createRecord($1, "string");
     }
-    | list_value { 
-        printf("Var: %s\n", $1->code);
+    | list_value { printf("Term: list_value\n"); }
+    | function_call { printf("Term: function_call\n"); }
+    ;
+
+type : P_TYPE { 
+        printf("Type: %s\n", $1);
+        $$ = createRecord("", $1);
+    }
+    | P_TYPE index { 
+        char *s1 = cat($1, $2, "", "", "");
+        printf("Type: %s\n", s1);
+        $$ = createRecord("", s1);
+        free(s1);
+        free($2);
     }
     ;
 
-var_list : var { 
-        printf("Var_list: %s\n", $1);
-        $$ = createRecord($1, "");
-        free($1);
+comparison : expr LESS expr { printf("Comparison: expr < expr\n"); }
+    | expr GREATER expr { printf("Comparison: expr > expr\n"); }
+    | expr LESS_EQUAL expr { printf("Comparison: expr <= expr\n"); }
+    | expr GREATER_EQUAL expr { printf("Comparison: expr >= expr\n"); }
+    | expr EQUAL expr { printf("Comparison: expr == expr\n"); }
+    | expr NOT_EQUAL expr { printf("Comparison: expr != expr\n"); }
+    ;
 
-    }
-    | var_list ',' var { 
-        printf("Var_list , %s\n", $1->code; 
-        char *s1 = cat($1->code, ",", $3, "", "");
-        $$ = createRecord(s1, "");
-        freeRecord($1);
+condition : comparison { printf("Condition: comparison\n"); }
+    | condition AND condition { printf("Condition: cond AND cond\n"); }
+    | condition OR condition { printf("Condition: cond OR cond\n"); }
+    | NOT condition { printf("Condition: NOT cond\n"); }
+    | '(' condition ')' { printf("Condition: (condition)\n"); }
+    ;
+
+if_statement : IF '(' condition ')' '{' stmlist '}' {
+        char *s1 = cat("if(", $3->code, ")", "\n", "{\n");
+        char *s2 = cat(s1, $6->code, "}\n", "", "");
+        printf("IF statement: %s\n", s2);
+        $$ = createRecord(s2, "");
         freeRecord($3);
+        freeRecord($6);
         free(s1);
+        free(s2);
     }
-    | {
-        printf("Var_list: empty\n"); 
+    | IF '(' condition ')' '{' stmlist '}' elif_list {
+        printf("IF statement: IF, ELIF\n");
     }
-    ;
-
-type : P_TYPE {
-        printf("Type: %s\n", $1); 
-        $$ = createRecord($1, $1);
-        free($1);
+    | IF '(' condition ')' '{' stmlist '}' else_statement {
+        printf("IF statement: IF, ELSE\n");
     }
-    | list {
-        printf("Type: list\n");
-        $$ = createRecord($1->code, "");
-        freeRecord($1);
+    | IF '(' condition ')' '{' stmlist '}' elif_list else_statement {
+        printf("IF statement: IF, ELIF, ELSE\n");
     }
     ;
 
-list : P_TYPE LESS type GREATER {
-        printf("List: %s < %s >\n", $1->code, $3->code);
-        char *s1 = cat($1->code, "<", $3->code, "","");
+elif_list : ELIF '(' condition ')' '{' stmlist '}' { printf("ELIF statement\n"); }
+    | elif_list ELIF '(' condition ')' '{' stmlist '}' { printf("ELIF list\n"); }
+    ;
+
+else_statement : ELSE '{' stmlist '}' { printf("ELSE statement\n"); }
+    ;
+
+while_statement : WHILE '(' condition ')' '{' stmlist '}' {
+        printf("While statement\n");
+        char *s1 = cat("while(", $3->code, ")\n{\n", $6->code, "}\n");
         $$ = createRecord(s1, "");
         free(s1);
-        freeRecord($1);
         freeRecord($3);
+        freeRecord($6);
     }
     ;
 
-list_value : ID '[' index ']' { 
-        printf("List_value: %s[%s]\n");
-        char *s1 = cat($1, "[", $3, "]", "");
-        $$ = createRecord(s1, "");
-        free($1);
+for_statement : FOR '(' assignment SEMI condition SEMI assignment ')' '{' stmlist '}' {
+        printf("For statement\n");
+        char *s1 = cat("for(", $3->code, ";", $5->code, ";");
+        char *s2 = cat(s1, $7->code, "){\n", $10->code, "}\n");
+        $$ = createRecord(s2, "");
         free(s1);
-    }
-    | '[' var_list ']' { 
-        printf("List_value: %s\n");
-        char *s1 = cat("[", $2->code, "]", "", "");
-        $$ = createRecord(s1, "");
-        freeRecord($2);
-        free(s1);
-    }
-    ;
-
-index : ID {
-        printf("Index: %s\n");
-        $$ = createRecord($1, "");
-    }
-    | INTEGER { 
-        printf("Index: INTEGER\n"); 
-        $$ = createRecord($1, "");
+        free(s2);
+        freeRecord($3);
+        freeRecord($5);
+        freeRecord($7);
+        freeRecord($10);
     }
     ;
 
 function_call : ID '(' paramslist ')' {
-        printf("Function_call: %s(%s)\n", $1, $3->code);
+        printf("Function call: %s\n", $1);
         char *s1 = cat($1, "(", $3->code, ")", "");
         $$ = createRecord(s1, "");
-        freeRecord($3);
+        free(s1);
         free($1);
-        free(s1);
-    }
-    ;
-print_command:  PRINT '(' var_list ')' {
-        printf("Print: %s\n", $3->code);
-        $$ = createRecord("printf(\"%s\",$3 -> code)","");
         freeRecord($3);
     }
-    |PRINT '('concat_string ')' {
-        printf("Print: %s\n", $3->code);
-        char *s1 = cat("printf(",$3->code, "",")","");
-        $$ = createRecord(s1,"");
-        freeRecord($3);
-        free(s1);
-    }
     ;
-concat_string: LIT_STRING PLUS var {
-        printf("concat_string: %s + %s\n", $1, $3);
-        int lenStr = strlen($1);
-        
-        $1[lenStr-1] = '\0';
 
-        char *s1 = cat($1, "%s\\n", "\"", ",",$3);
+paramslist : params {
+        $$ = createRecord($1->code, "");
+        freeRecord($1);
+    }
+    | params ',' paramslist {
+        printf("Parameter list: multiple\n");
+        char *s1 = cat($1->code, ",", $3->code, "", "");
         $$ = createRecord(s1, "");
         free(s1);
-        free($3);
-        free($1);
+        freeRecord($1);
+        freeRecord($3);
+    }
+    | {
+        $$ = createRecord("", "");
     }
     ;
-params : type ID {
-        printf("Params: %s %s\n", $1->code, $2); 
-        char *s1 = cat($1->code, " ", $2, "", "");
-        char *key = cat(top(), "#", $2, "", "");
 
-        hash_table_set(symbols_table, key, $1->type);
+params : ID {
+        printf("Parameter: %s\n", $1);
+        $$ = createRecord($1, "");
+        free($1);
+    }
+    | ID '=' expr {
+        printf("Parameter: %s = %s\n", $1, $3->code);
+        char *s1 = cat($1, "=", $3->code, "", "");
         $$ = createRecord(s1, "");
-        free(key);
+        free(s1);
+        free($1);
+        freeRecord($3);
+    }
+    | type ID {
+        printf("Parameter: %s %s\n", $1->type, $2);
+        char *s1 = cat($1->type, " ", $2, "", "");
+        $$ = createRecord(s1, "");
+        freeRecord($1);
         free(s1);
         free($2);
-        freeRecord($1);   
     }
-    | expr { 
-        printf("Params: expr\n");
-        $$ = createRecord($1 -> code, "");
+    | type ID '=' expr {
+        printf("Parameter: %s %s = %s\n", $1->type, $2, $4->code);
+        char *s1 = cat($1->type, " ", $2, "=", $4->code);
+        $$ = createRecord(s1, "");
         freeRecord($1);
+        freeRecord($4);
+        free(s1);
+        free($2);
     }
-    | { printf("Params: empty\n"); $$ = createRecord("", "");};
     ;
 
-paramslist : params { printf("Params list: single\n"); 
-        $$ = createRecord($1 -> code, "");
-        freeRecord($1); 
-    }
-    | params ',' paramslist { printf("Params list: multiple\n"); 
-        char *s1 = cat($1->code, ",", $3->code, "","");
-        freeRecord($1);
-        freeRecord($3);
+print_command : PRINT '(' concat_string ')' {
+        printf("Print: %s\n", $3->code);
+        char *s1 = cat("printf(", $3->code, ");", "", "");
         $$ = createRecord(s1, "");
+        free(s1);
+        freeRecord($3);
+    }
+    ;
+
+concat_string : LIT_STRING {
+        printf("Concat: %s\n", $1);
+        char *s1 = cat("\"", $1, "\"", "", "");
+        $$ = createRecord(s1, "");
+        free(s1);
+    }
+    | concat_string '+' LIT_STRING {
+        printf("Concat: %s + %s\n", $1->code, $3);
+        char *s1 = cat($1->code, " + ", "\"", $3, "\"");
+        $$ = createRecord(s1, "");
+        free(s1);
+        freeRecord($1);
+    }
+    | concat_string '+' ID {
+        printf("Concat: %s + %s\n", $1->code, $3);
+        char *s1 = cat($1->code, " + ", $3, "", "");
+        $$ = createRecord(s1, "");
+        free(s1);
+        freeRecord($1);
+        free($3);
+    }
+    ;
+
+list_value : ID index {
+        printf("List value: %s %s\n", $1, $2);
+        char *s1 = cat($1, $2, "", "", "");
+        $$ = createRecord(s1, "");
+        free($1);
+        free($2);
         free(s1);
     }
     ;
 
-condition : expr comparison expr {
-    printf("Condition: expr comparison expr\n"); 
-    char *s1 = cat($1->code, $2->code, $3->code, "", "");
-    $$ = createRecord(s1, "");
-    free(s1);
-    freeRecord($1);
-    freeRecord($2);
-    freeRecord($3);
-}
-| NOT ID { 
-    printf("Condition: not id\n"); 
-}
-| '(' condition ')' { 
-    printf("Condition: ( condition )\n"); 
-}
-;
+index : '[' expr ']' {
+        printf("Index: [expr]\n");
+        char *s1 = cat("[", $2->code, "]", "", "");
+        $$ = s1;
+        freeRecord($2);
+    }
+    | index '[' expr ']' {
+        printf("Index: index [expr]\n");
+        char *s1 = cat($1, "[", $3->code, "]", "");
+        $$ = s1;
+        free($1);
+        freeRecord($3);
+    }
+    ;
 
-condition_list : condition { 
-    printf("Condition_list: condition\n"); 
-    $$ = $1;
-
-}
-| condition_list comparison condition {
-    printf("Condition_list: condition_list comparison condition\n"); 
-    char *s1 = cat($1->code, $2->code, $3->code, "", "");
-    $$ = createRecord(s1, "");
-    free(s1);
-    freeRecord($2);
-    freeRecord($3);
-}
-;
-
-comparison : EQUAL { 
-    printf("Comparison: ==\n"); 
-    $$ = "==";
-}
-| NOT_EQUAL { 
-    printf("Comparison: !=\n"); 
-    $$ = "!=";
-}
-| LESS { 
-    printf("Comparison: <\n"); 
-    $$ = "<";
-}
-| GREATER { 
-    printf("Comparison: >\n"); 
-    $$ = ">";
-}
-| LESS_EQUAL { 
-    printf("Comparison: <=\n"); 
-    $$ = "<=";
-}
-| GREATER_EQUAL { 
-    printf("Comparison: >=\n"); 
-    $$ = ">=";
-}
-| AND { 
-    printf("Comparison: &&\n"); 
-    $$ = "&&";
-}
-| OR { 
-    printf("Comparison: ||\n"); 
-    $$ = "||";
-}
-;
-
-if_statement : IF '(' condition_list ')' '{' stmlist '}' { 
-    printf("If statement: if ( %s ) { %s }\n", $3->code, $6->code);
-    char *s1 = cat($1->code, "(", $3->code, ") {\n", $6->code);
-    char *s2 = cat(s1, "}\n", "", "", "");
-    $$ = createRecord(s2, "");
-    free(s1);
-    free(s2);
-    freeRecord($3);
-    freeRecord($6);
-}
-| IF '(' condition_list ')' '{' stmlist '}' else_if_statements ELSE  '{' stmlist '}' { 
-    printf("If statement: if (%s) { %s } %s else { %s }\n", $3->code, $6->code, $8->code, $11->code); 
-    char *s1 = cat($1->code, "(", $3->code, ") {\n", $6->code);
-    char *s2 = cat("}\n", $8->code, "else {\n", $11->code, "}\n");
-    char *s3 = cat(s1, s2 , "", "", "");
-    $$ = createRecord(s3, "");
-    free(s1);
-    free(s2);
-    free(s3);
-    freeRecord($3);
-    freeRecord($6);
-    freeRecord($8);
-    freeRecord($11);
-}
-;
-
-else_if_statements : ELIF '(' condition_list ')' '{' stmlist '}' else_if_statements {
-    printf("Else if statement: elif ( %s ) { %s }\n", $3->code, $6->code, $8->code); 
-    char *s1 = cat($1->code, "(", $3->code, ") {\n", $6->code);
-    char *s2 = cat("}\n", $8->code, "", "", "");
-    char *s3 = cat(s1, s2, "", "", "");
-    $$ = createRecord(s3, "");
-    free(s1);
-    free(s2);
-    free(s3);
-    freeRecord($3);
-    freeRecord($6);
-    freeRecord($8);
-}
-| { 
-    printf("Else if statements: empty\n"); 
-}
-;
-
-while_statement : WHILE '(' condition_list ')' '{' stmlist '}' {
-    printf("While statement: while ( %s ) { %s }\n", $3->code, $6->code);
-    char *s1 = cat($1, "(", $3->code, ") {\n", $6->code, "}\n");
-    char *s2 = cat(s1, "");
-    $$ = createRecord(s1, "");
-    free(s1);
-    free(s2)
-    freeRecord($3);
-    freeRecord($6);
-}
-;
-
-for_statement : FOR '(' assignment ';' condition ';' assignment ';' ')' '{' stmlist '}' {
-    printf("For statement: for ( %s ; %s ; %s ; ) { %s }\n", $3->code, $5->code, $7->code, $10->code); 
-    char *s1 = cat($1->code, "(", $3->code, ";", $5->code);
-    char *s2 = cat(";", $7->code, "; ) {", $10->code, "}");
-    char *s3 = cat(s1, s2, "", "");
-    $$ = createRecord(s3, "");
-    free(s1);
-    free(s2);
-    free(s3);
-    freeRecord($3);
-    freeRecord($5);
-    freeRecord($7);
-    freeRecord($10);
-}
-| FOR '(' P_TYPE ID IN ID ')' '{' stmlist '}' { 
-    printf("For statement: for ( %s %s in %s ) { %s }\n", $3->code, $4->code, $6->code, $9->code); 
-    char *s1 = cat($1->code, "(", $3->code, $4->code, "in");
-    char *s2 = cat($6->code, ")", "{", $9->code, "}");
-    char *s3 = cat(s1, s2, "", "", "");
-    $$ = createRecord(s3, "");
-    free(s1);
-    free(s2);
-    freeRecord($3);
-    freeRecord($4);
-    freeRecord($6);
-    freeRecord($9);
-}
-;
+list : ID index {
+        printf("List: %s %s\n", $1, $2);
+        char *s1 = cat($1, $2, "", "", "");
+        $$ = createRecord(s1, "");
+        free($1);
+        free($2);
+        free(s1);
+    }
+    ;
 
 %%
 
-int main(int argc, char ** argv) {
-    int codigo;
+char * cat(char *a, char *b, char *c, char *d, char *e) {
+    char *s = (char *) malloc(strlen(a) + strlen(b) + strlen
 
-    if (argc > 1) {
-        FILE *file = fopen(argv[1], "r");
-        if (!file) {
-            printf("Could not open file %s\n", argv[1]);
-            return 1;
-        }
-        yyin = file;
+(c) + strlen(d) + strlen(e) + 1);
+    strcpy(s, a);
+    strcat(s, b);
+    strcat(s, c);
+    strcat(s, d);
+    strcat(s, e);
+    return s;
+}
+
+char* top() {
+    if (stackIndex < 0) {
+        return NULL;
     }
+    return scope_stack[stackIndex];
+}
 
-    if (argc != 3) {
-        printf("Usage: $./compiler input.txt output.txt\nClosing application...\n");
-        exit(0);
+void push(char * scope) {
+    stackIndex++;
+    scope_stack[stackIndex] = strdup(scope);
+}
+
+void pop() {
+    if (stackIndex >= 0) {
+        free(scope_stack[stackIndex]);
+        stackIndex--;
+    }
+}
+
+void print_stack() {
+    printf("Scope stack: ");
+    for (int i = 0; i <= stackIndex; i++) {
+        printf("%s ", scope_stack[i]);
+    }
+    printf("\n");
+}
+
+char* new_label() {
+    char label[10];
+    sprintf(label, "L%d", labelCounter);
+    labelCounter++;
+    return strdup(label);
+}
+
+struct record* createRecord(char* code, char* type) {
+    struct record* rec = (struct record*) malloc(sizeof(struct record));
+    rec->code = strdup(code);
+    rec->type = strdup(type);
+    return rec;
+}
+
+void freeRecord(struct record* rec) {
+    if (rec) {
+        if (rec->code) free(rec->code);
+        if (rec->type) free(rec->type);
+        free(rec);
+    }
+}
+
+void yyerror(char *s) {
+    fprintf(stderr, "%s\n", s);
+}
+
+int main(int argc, char **argv) {
+    if (argc != 2) {
+        fprintf(stderr, "Usage: %s <source-file>\n", argv[0]);
+        exit(1);
     }
     
-    yyin = fopen(argv[1], "r");
-    yyout = fopen(argv[2], "w");
+    FILE *file = fopen(argv[1], "r");
+    if (!file) {
+        fprintf(stderr, "Error opening file: %s\n", argv[1]);
+        exit(1);
+    }
+
+    yyin = file;
+    
     symbols_table = hash_table_create();
-    abstractions_table = hash_table_create();
-    escopo_stack = malloc(sizeof(struct node));
-    insert_at_head("main");
-    char *a_symbol = cat(top(), "#","A","","");
-    hash_table_set(symbols_table,a_symbol, "float");
-    codigo = yyparse();
+    
+    yyparse();
 
-    fclose(yyin);
-    fclose(yyout);
+    fclose(file);
+    hash_table_destroy(symbols_table);
 
-	return codigo;
-}
-
-int yyerror(char *msg) {
-    // fprintf(stderr, "%s at '%s'\n", yylineno, msg, yytext);
-    fptintf(stderr, "%s at line %d before '%s'\n", msg, yylineno, yytext);
     return 0;
-}
-
-char *cat(const char *s1, const char *s2, const char *s3, const char *s4, const char *s5) {
-    size_t len = strlen(s1) + strlen(s2) + strlen(s3) + strlen(s4) + strlen(s5) + 1;
-    char output = (char *) malloc(sizeof(char) *len);
-    
-    if (output == NULL) {
-        perror("Failed to allocate memory for concatenation. Closing application...\n");
-        exit(EXIT_FAILURE);
-    }
-    
-    sprintf(output, "%s%s%s%s%s", s1, s2, s3, s4, s5);
-    
-    return output;
 }
